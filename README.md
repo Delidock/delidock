@@ -23,7 +23,7 @@ pnpm turbo dev --filter <service>
 ```
 You can also chain these `--filter` flags:
 ```
-pnpm turbo dev  --filter <service1> --filter <service2>
+pnpm turbo dev --filter <service1> --filter <service2>
 ```
 #### Services
 Service names are specified in each `package.json` of each service.
