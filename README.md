@@ -1,5 +1,5 @@
 # Delidock
-This repo contains huge part of Delidock ecosystem, containg backend for managing the box and transport of the live video stream.
+This repo is huge part of Delidock ecosystem, containg backend for managing the box and transport of the live video stream.
 ## Dependencies
 - `node >= 18`
 - `pnpm`
