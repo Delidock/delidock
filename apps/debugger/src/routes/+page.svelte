@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { enhance } from '$app/forms';
     import { Participant, RemoteParticipant, Room, RoomEvent, Track, VideoPresets, type RoomOptions } from 'livekit-client';
     import { Socket, io } from "socket.io-client";
 	import { onMount } from "svelte";
@@ -20,7 +21,7 @@
             }
 
             socket.emit("checkOpen")
-            actions.connectionPrep(token, url)
+            
         } catch (error) {
             
         }
@@ -96,12 +97,12 @@
     
 
     //LiveKit
-    let token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ2aWRlbyI6eyJyb29tSm9pbiI6dHJ1ZSwicm9vbSI6InF1aWNrc3RhcnQtcm9vbSJ9LCJpYXQiOjE3MDE3NjYxNTksIm5iZiI6MTcwMTc2NjE1OSwiZXhwIjoxNzAxNzg3NzU5LCJpc3MiOiJkZXZrZXkiLCJzdWIiOiJBUFAiLCJqdGkiOiJBUFAifQ.B8OQC2OZtY5qCtr8nAk4Ed0t9HUAKCS95fl_eoB5_DY"
+    let token : string
     let url = "ws://localhost:7880"
     let boxVideo : HTMLVideoElement
     let isVideo : boolean
-    let boxes = {
-
+    const handleConnect = (token: string, url: string) => {
+        actions.connectionPrep(token, url)
     }
 
     const actions = {
@@ -218,6 +219,11 @@
         <div class="flex flex-col gap-2">
             <p class="text-white w-full text-center">Live video preview</p>
             <hr>
+            <p class="text-white w-full text-start">Livekit token:</p>
+            <form on:submit={()=>handleConnect(token, url)}>
+                <input class="text-black rounded-md p-1 h-full w-4/5" type="text" bind:value={token} required>
+                <button type="submit"class="transition-colors ease-in-out bg-blue-500 py-2 px-5 rounded-md text-white hover:bg-blue-400" >Connect to LiveKit</button>
+            </form>
             <section class="p-5 aspect-video bg-slate-300 rounded-md flex-col flex justify-senter items-center gap-3 overflow-hidden">
                 <!-- svelte-ignore a11y-media-has-caption -->
                 <video class="h-full rounded-lg" class:hidden={!isVideo} bind:this={boxVideo} src="" ></video>
