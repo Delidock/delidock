@@ -11,7 +11,9 @@ export default {
         outline: '#2A2A47',
         btn_primary: '#A1A1F7',
         btn_secondary: '#1A1A3E',
-        btn_pressed: '#232340'
+        btn_pressed: '#232340',
+        red: '#CF3A4B',
+        green: '#56E08D'
   
       },
       height: {
