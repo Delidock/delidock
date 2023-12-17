@@ -1,8 +1,11 @@
 <script lang="ts">
+	import { goto } from "$app/navigation";
 	import { AccountIcon, Box, BoxWidget, Doggo, PlusIcon } from "$lib";
 	import { boxes } from "$lib/stores/store";
 	import { onMount } from "svelte";
+	import Cookies from "universal-cookie";
 
+    
     let date = new Date()
     let today : string = `${date.toLocaleDateString('en-US', {weekday: 'long'})} ${date.toLocaleString('en-US',{month: 'long'})} ${date.getDate()}`
     let now : string = `${date.getHours()}:${("0"+date.getMinutes()).slice(-2)}:${("0"+date.getSeconds()).slice(-2)}`
@@ -21,6 +24,15 @@
         new Box("Mirek", "qhdKKT15", "792856", "superToken", "ws://my.server.app/", false)
     ]
 
+    const logout = async () => {
+        const cookies = new Cookies()
+        cookies.remove("token", {
+            secure: true,
+            path: "/",
+            sameSite: "strict"
+        })
+        goto("/sign/in", {replaceState: true})
+    }
 </script>
 <section class="min-h-[100svh] w-full bg-background px-4 flex flex-col gap-1 relative pb-8">
     <div class="sticky top-0 bg-background pt-4 pb-1 z-10">
@@ -37,7 +49,7 @@
             </div>
             <div class="w-2/5 flex flex-col gap-6">
                 <div class="h-1/5 w-full flex justify-end items-start">
-                    <button class="active:scale-90 transition-transform ease-in-out"><AccountIcon/></button>
+                    <button on:click|preventDefault={()=>logout()} class="active:scale-90 transition-transform ease-in-out"><AccountIcon/></button>
                 </div>
                 <div class="h-4/5 w-full flex justify-end items-center">
                     <img src={Doggo} class="h-20" alt="">

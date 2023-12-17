@@ -6,16 +6,18 @@
     let splittedPin : string = $box.pin.slice(0, ($box.pin.length/2)) + " " + $box.pin.slice(($box.pin.length/2))
 
     let hiddenCode : boolean = true
-    let pin : HTMLButtonElement
+    let copyText : boolean = false
+
     const copy = () => {        
         navigator.clipboard.writeText(splittedPin)
-        pin.innerText = "Copied"
+        copyText = true
         setTimeout(() => {
-            pin.innerText = $box.pin.slice(0, ($box.pin.length/2)) + " " + $box.pin.slice(($box.pin.length/2))
-        }, 1000);   
+            copyText = false
+        }, 500);   
     }
     
     const changePIN = () => {
+        copyText = false
         hiddenCode = true
         $box.changePIN()
     }
@@ -23,6 +25,7 @@
     const unlockBox = () => {
         $box.unlock()
     }
+
     $: {
         splittedPin = $box.pin.slice(0, ($box.pin.length/2)) + " " + $box.pin.slice(($box.pin.length/2))
     }
@@ -34,7 +37,11 @@
         <StatusWidget open={$box.status}/>
     </div>
     <div class="border-btn_secondary h-[55%] rounded-lg border-[1px] flex justify-center items-center relative">
-        <button bind:this={pin} class="text-5xl tracking-widest" class:blur={hiddenCode} on:click={()=>copy()}>{splittedPin}</button>
+        {#if !copyText}
+                <button class="text-5xl tracking-widest" class:blur={hiddenCode} on:click={()=>copy()}>{splittedPin}</button>
+            {:else}
+                <p>Copied!</p>        
+        {/if}
         {#if hiddenCode}
             <div class="absolute w-full h-full flex justify-center items-center">
                 <button class="active:scale-95 transition-transform ease-in-out" on:click={()=>{hiddenCode = false}}><ShowEyeIcon/></button>

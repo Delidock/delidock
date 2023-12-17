@@ -10,6 +10,11 @@
     let emailError : null | string
     let passwordError : null | string
 
+    const formReset = () => {
+        email=''
+        password=''
+    }
+
     const handleLogin = async () => {
         const res = await fetch("http://localhost:3000/sign/in", {
             method: "post",
@@ -21,13 +26,17 @@
         })
         switch (res.status) {
             case 200:
-                const cookies = new Cookies()
-                cookies.set("token", await res.text(), {
-                    secure: true,
-                    sameSite: 'strict',
-                    path: "/"
-                    }
-                )
+                const token = await res.text()
+                if (true) {
+                    const cookies = new Cookies()
+                    cookies.set("token", token, {
+                        secure: true,
+                        path: "/",
+                        sameSite: "strict"
+                        }
+                    )
+                }
+                formReset()
                 goto("/", { replaceState: true})
                 break;
             case 401:
