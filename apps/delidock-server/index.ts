@@ -1,6 +1,8 @@
 import express, {Express, Request, Response} from 'express'
 import { Server, Socket } from 'socket.io'
 import { instrument } from "@socket.io/admin-ui";
+import cors from 'cors'
+import bodyParser from 'body-parser'
 
 const app : Express = express()
 const io = new Server(3001, {cors:{
@@ -78,6 +80,24 @@ io.on("connection", (socket : Socket)=>{
         logs("Changed PIN to "+args)
     })
 })  
+app.use(cors())
+app.use(bodyParser.json())
 
+app.post("/sign/up", (req, res) => {
+    if (req.body.email === 'skopek.stepan@gmail.com') {
+        res.status(409).send()
+    }
+    res.status(200).send()
+    //DB OPERATIONS
+})
+
+app.post("/sign/in", (req, res) => {
+
+    //DB OPERATIONS
+    if (req.body.password === "KOKOT") {
+        res.status(200)
+    }
+    res.status(401).send()
+})
 
 app.listen(3000, ()=>console.log("POSLOUCHAM na 3000, ws 3001"))
