@@ -84,18 +84,28 @@ app.use(cors())
 app.use(bodyParser.json())
 
 app.post("/sign/up", (req, res) => {
-    if (req.body.email === 'skopek.stepan@gmail.com') {
-        res.status(409).send()
-    }
-    res.status(200).send()
     //DB OPERATIONS
+    if (req.body.email !== 'skopek.stepan@gmail.com') {
+        res.status(200).send()
+        
+    }
+    
+    res.status(409).send()
+    
+})
+app.post("/sign/up/confirm", (req, res) => {
+    //DB OPERATIONS
+    if ((req.body.email !== 'skopek.stepan@gmail.com') && (req.body.password === req.body.confirmedPass)) {
+        res.status(200).send()
+    }
+    res.status(401).send()
 })
 
 app.post("/sign/in", (req, res) => {
 
     //DB OPERATIONS
     if (req.body.password === "KOKOT") {
-        res.status(200)
+        res.status(200).send("MireckuvUzasnyToken")
     }
     res.status(401).send()
 })

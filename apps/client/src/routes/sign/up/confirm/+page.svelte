@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { enhance } from "$app/forms";
+	import { goto } from "$app/navigation";
 	import { Button, InputField, PasswordIcon} from "$lib";
 	import { registerUser } from "$lib/stores/store.js";
 
@@ -10,16 +11,6 @@
     let password : string
 
     let greenConfirmed : boolean = false
-
-    export let form
-
-    const updateForm = () => {
-        if (form) {
-            if (form.incorrect) {
-                confirmError="Password do not match"
-            }
-        }
-    }
 
     const checkPasswordMatch = () =>{
         if (!confirmedPass) {
@@ -37,13 +28,45 @@
     const clearRegisterUser = () => {
         $registerUser = null
     }
+
+    const handleConfirm = async () => {
+        if (!$registerUser) {
+            goto("/sign/up", {replaceState: true})
+            return
+        }
+        const res = await fetch("http://localhost:3000/sign/up/confirm", {
+            method: "post",
+            headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({...$registerUser, password, confirmedPass})
+        })
+        switch (res.status) {
+            case 200:
+                goto("/sign/in", { replaceState: true})
+                break;
+            case 401:
+                confirmError = "Password does not match"
+                greenConfirmed = false
+                break
+            case 409:
+                confirmError = "Account is already registered"
+                greenConfirmed = false
+                break
+            default:
+                confirmError = "Something went wrong"
+                greenConfirmed = false
+                break;
+        }
+        
+    }
     $: confirmedPass, checkPasswordMatch()
-    $: form, updateForm()
 </script>
 <section class="w-screen h-full flex flex-col">
     <div class="w-full h-full bg-background rounded-t-[2rem] px-6 pb-10 pt-8 flex flex-col items-center justify-start relative">
         <h1 class="text-text_color text-2xl flex mb-4">Register</h1>
-        <form on:submit={()=>{clearRegisterUser()}} action="?/register" method="post" use:enhance class="flex-col flex w-full gap-3">
+        <form on:submit|preventDefault={()=>{handleConfirm()}} class="flex-col flex w-full gap-3">
             <div class="flex flex-col gap-3">
                 <p class="text-text_color text-sm">Confirm your password to make sure you haven't made a mistake.</p>
                 <InputField icon={PasswordIcon} label="Password" type="password" green={greenConfirmed} bind:value={password} error={passwordError}/>

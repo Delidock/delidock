@@ -1,8 +1,7 @@
 <script lang="ts">
-	import { enhance } from "$app/forms";
-    import { PasswordIcon, EmailIcon, InputField, Doggo, Button } from "$lib";
-
-    export let form
+	import { goto } from "$app/navigation";
+    import { PasswordIcon, EmailIcon, InputField, Button } from "$lib";
+    import Cookies from 'universal-cookie';
 
     let email : string | FormDataEntryValue
     let password : string
@@ -11,24 +10,41 @@
     let emailError : null | string
     let passwordError : null | string
 
-    const updateForm = () => {
-        passwordError = null
-        if (form) {
-            if (form.incorrect === true) {
-                passwordError = "Invalid password"
-                password = ""
-                if (form.email) {
-                    email = form.email
-                }
-            }
+    const handleLogin = async () => {
+        const res = await fetch("http://localhost:3000/sign/in", {
+            method: "post",
+            headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({email, password})
+        })
+        switch (res.status) {
+            case 200:
+                const cookies = new Cookies()
+                cookies.set("token", await res.text(), {
+                    secure: true,
+                    sameSite: 'strict',
+                    path: "/"
+                    }
+                )
+                goto("/", { replaceState: true})
+                break;
+            case 401:
+                passwordError = "Invalid credentials"
+                emailError = "Invalid credentials"
+                break
+            default:
+                passwordError = "Something went wrong"
+                emailError = "Something went wrong"
+                break;
         }
     }
-    $: form, updateForm()
 </script>
 <section class="w-screen h-full flex flex-col">
     <div class="w-full h-full bg-background rounded-t-[2rem] px-6 pb-8 pt-8 flex flex-col items-center justify-start relative">
         <h1 class="text-text_color text-2xl flex mb-4">Login</h1>
-        <form method="post" action="?/login" use:enhance class="flex-col flex w-full gap-2">
+        <form on:submit|preventDefault={()=>handleLogin()} class="flex-col flex w-full gap-2">
             <div class="flex flex-col gap-3">
                 <InputField icon={EmailIcon} label="Email" type="email" value={email} error={emailError}/>
                 <InputField icon={PasswordIcon} label="Password" type="password" bind:value={password} error={passwordError}/>
