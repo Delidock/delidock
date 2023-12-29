@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { Doggo } from "$lib";
+	import { Doggo } from "$lib/assets/images";
+    
 	import { fly } from "svelte/transition";
     export let data
 

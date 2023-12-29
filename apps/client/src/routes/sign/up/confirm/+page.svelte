@@ -1,8 +1,9 @@
 <script lang="ts">
-	import { enhance } from "$app/forms";
 	import { goto } from "$app/navigation";
-	import { Button, InputField, PasswordIcon} from "$lib";
-	import { registerUser } from "$lib/stores/store.js";
+	import { PasswordIcon } from "$lib/assets/icons";
+	import { Button, InputField } from '$lib/components'
+	import { registerUser } from "$lib/stores";
+	import { delidock } from "$lib/utils";
 
     let confirmedPass: string
     let confirmError : string | null
@@ -25,24 +26,13 @@
         }
     }
 
-    const clearRegisterUser = () => {
-        $registerUser = null
-    }
-
     const handleConfirm = async () => {
         if (!$registerUser) {
             goto("/sign/up", {replaceState: true})
             return
         }
-        const res = await fetch("http://localhost:3000/sign/up/confirm", {
-            method: "post",
-            headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({...$registerUser, password, confirmedPass})
-        })
-        switch (res.status) {
+        const confirmResponse = await delidock.confrimPassword($registerUser, password, confirmedPass)
+        switch (confirmResponse.status) {
             case 200:
                 goto("/sign/in", { replaceState: true})
                 break;

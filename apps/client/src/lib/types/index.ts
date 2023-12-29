@@ -1,4 +1,4 @@
-import { boxes } from "$lib/stores/store";
+import { boxes } from "$lib/stores";
 
 export interface RegisterUser {
     firstname: string,

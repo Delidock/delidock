@@ -1,4 +1,4 @@
-import { registerUser } from "$lib/stores/store";
+import { registerUser } from "$lib/stores";
 import { redirect } from "@sveltejs/kit";
 
 export function load() {

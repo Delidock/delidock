@@ -1,9 +1,11 @@
 <script lang="ts">
 	import { goto } from "$app/navigation";
-    import { PasswordIcon, EmailIcon, InputField, Button } from "$lib";
+    import { InputField, Button } from "$lib/components";
+    import { PasswordIcon, EmailIcon } from "$lib/assets/icons";
     import Cookies from 'universal-cookie';
+	import { delidock } from "$lib/utils";
 
-    let email : string | FormDataEntryValue
+    let email : string 
     let password : string
     let rememberMe : boolean = false
 
@@ -16,17 +18,10 @@
     }
 
     const handleLogin = async () => {
-        const res = await fetch("http://localhost:3000/sign/in", {
-            method: "post",
-            headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({email, password})
-        })
-        switch (res.status) {
+        const response = await delidock.login(email, password)
+        switch (response.status) {
             case 200:
-                const token = await res.text()
+                const token = await response.text()
                 if (true) {
                     const cookies = new Cookies()
                     cookies.set("token", token, {

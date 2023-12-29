@@ -1,20 +1,2 @@
 
 // place files you want to import through the `$lib` alias in this folder.
-export {default as InputField} from './components/InputField.svelte'
-export {default as EmailIcon} from './icons/EmaiIcon.svelte'
-export {default as PasswordIcon} from './icons/PasswordIcon.svelte'
-export {default as Doggo} from './images/doggo.svg'
-export {default as Button} from './components/Button.svelte'
-export {default as PersonIcon} from './icons/PersonIcon.svelte'
-export {default as AccountIcon} from './icons/AccountIcon.svelte'
-export {default as BoxWidget} from './components/BoxWidget.svelte'
-export {default as PlusIcon} from './icons/PlusIcon.svelte'
-export {default as StatusWidget} from './components/StatusWidget.svelte'
-export {default as BoxButton} from './components/BoxButton.svelte'
-export {default as UnlockIcon} from './icons/UnlockIcon.svelte'
-export {default as ResetIcon} from './icons/ResetIcon.svelte'
-export {default as ThreeDotIcon} from './icons/ThreeDotIcon.svelte'
-export {default as ShowEyeIcon} from './icons/ShowEyeIcon.svelte'
-export {default as HideEyeIcon} from './icons/HideEyeIcon.svelte'
-
-export * from './types'

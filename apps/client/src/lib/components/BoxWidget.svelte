@@ -1,6 +1,8 @@
 <script lang="ts">
-	import { Box, BoxButton, HideEyeIcon, ShowEyeIcon, StatusWidget, ThreeDotIcon, UnlockIcon, ResetIcon } from "$lib";
-    
+	import { HideEyeIcon, ShowEyeIcon,  ThreeDotIcon, UnlockIcon, ResetIcon } from "$lib/assets/icons";
+    import { BoxButton, StatusWidget } from '$lib/components'
+    import {  Box } from '$lib/types'
+
     export let box : Box
 
     let splittedPin : string = $box.pin.slice(0, ($box.pin.length/2)) + " " + $box.pin.slice(($box.pin.length/2))

@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { EmailIcon } from "$lib";
+    import { EmailIcon } from "$lib/assets/icons";
     export let label : string = "Input"
     export let value : string | FormDataEntryValue
     export let type = "text"
