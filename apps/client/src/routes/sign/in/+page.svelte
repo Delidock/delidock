@@ -35,6 +35,8 @@
                 goto("/", { replaceState: true})
                 break;
             case 401:
+                passwordError = ""
+                emailError = ""
                 passwordError = "Invalid credentials"
                 emailError = "Invalid credentials"
                 break

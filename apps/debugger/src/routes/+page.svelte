@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { enhance } from '$app/forms';
     import { Participant, RemoteParticipant, Room, RoomEvent, Track, VideoPresets, type RoomOptions } from 'livekit-client';
     import { Socket, io } from "socket.io-client";
 	import { onMount } from "svelte";
@@ -8,7 +7,7 @@
     onMount(()=>{
         try {
             
-            const connection : Socket= io("ws://10.0.2.2:3001", {
+            const connection : Socket= io("wss://2f15-86-49-9-122.ngrok-free.app", {
                 auth: {
                     room: userIdFromServer
                 }

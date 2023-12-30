@@ -1,5 +1,4 @@
 import { redirect } from '@sveltejs/kit';
-import type { PageLoad } from '../sign/$types';
 export const prerender = 'auto'
 export const load = async ({ params, parent }) => {
 

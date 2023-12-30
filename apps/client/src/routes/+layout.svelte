@@ -1,13 +1,20 @@
 <script>
 	import { slide } from "svelte/transition";
     import "../app.css";
+	import { onMount } from "svelte";
+	import Cookies from "universal-cookie";
+	import { goto } from "$app/navigation";
 
     export let data
+
+    onMount(()=>{
+        if ((new Cookies().get('token'))) {
+            goto('/', {replaceState: true})
+        }
+    })
 </script>
 <main class="bg-secondary w-full min-h-[100svh]">
-    {#key data.url}
-        <div transition:slide>
-            <slot/>
-        </div>
-    {/key}
+    <div transition:slide>
+        <slot/>
+    </div>
 </main>

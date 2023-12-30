@@ -6,6 +6,8 @@
     export let error : string | null
     export let icon : any = EmailIcon
     export let green : boolean = false
+    export let id : string = ""
+
 
     let formInvalid : boolean
     let title = label
@@ -36,7 +38,7 @@
     }
     
 </script>
-<div>
+<div id={id}>
     <p class:!text-red={formInvalid} class="text-xs text-text_color mb-1">{title}</p>
     <div class:!border-red={formInvalid} class:!border-green={green} class="transition-colors ease-in-out w-full h-16 bg-secondary border-2 border-btn_secondary rounded-lg text-text_color text-base flex-row flex px-3 items-center gap-3">
         <svelte:component this={icon}/>

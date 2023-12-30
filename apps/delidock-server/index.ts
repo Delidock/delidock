@@ -6,7 +6,7 @@ import bodyParser from 'body-parser'
 
 const app : Express = express()
 const io = new Server(3001, {cors:{
-    origin: ["https://admin.socket.io", "http://127.0.0.1:5173", "http://localhost:5173", "http://127.0.0.1:5174", "http://localhost:5174"],
+    origin: "*",
     credentials: true
 }})
 
@@ -14,7 +14,7 @@ instrument(io, {
     auth: {
         type: "basic",
         username: "admin",
-        password: "$2y$10$YQs8fPqQk1W7o2SrxXIvmOCTeVwjLk1ARgZJ148cVgCqaCo/N1DKy"
+        password: "$2y$10$.xrNVHREo2Bxm2.xEv97SuTRC/Kx4ebbKZ/rcEHqlRPs/kez1/s4a"
     },
   });
 
@@ -103,11 +103,12 @@ app.post("/api/sign/up/confirm", (req, res) => {
 
 app.post("/api/sign/in", (req, res) => {
 
-    //DB OPERATIONS
+    //DB OPERATIONS    
     if (req.body.password === "KOKOT") {
         res.status(200).send("MireckuvUzasnyToken")
     }
     res.status(401).send()
 })
+
 
 app.listen(3000, ()=>console.log("POSLOUCHAM na 3000, ws 3001"))

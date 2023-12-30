@@ -44,7 +44,7 @@
                 <div class="flex flex-col gap-3">
                     <InputField icon={PersonIcon} label="Firstname" type="text" bind:value={firstname} error={null}/>
                     <InputField icon={PersonIcon} label="Lastname" type="text" bind:value={lastname} error={null}/>
-                    <InputField icon={EmailIcon} label="Email" type="email" bind:value={email} error={emailError}/>
+                    <InputField icon={EmailIcon} label="Email" type="email" bind:value={email} error={emailError} id="register"/>
                 </div>
                 <div class="w-1/2">
                     <Button type="submit" label="Register" />

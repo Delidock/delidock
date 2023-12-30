@@ -4,7 +4,7 @@ import Cookies from "universal-cookie"
 
 class Delidock {
     login = async (email: string, password: string) => {
-        return await fetch("/api/sign/in", {
+        return await fetch("https://5455-86-49-9-122.ngrok-free.app/api/sign/in", {
             method: "post",
             headers: {
             'Accept': 'application/json',
@@ -23,7 +23,7 @@ class Delidock {
     }
 
     register = async (email: string) => {
-        return await fetch("/api/sign/up", {
+        return await fetch("https://5455-86-49-9-122.ngrok-free.app/api/sign/up", {
         method: "post",
         body: JSON.stringify({email}),
         headers: {
@@ -34,7 +34,7 @@ class Delidock {
     }
 
     confrimPassword = async (registerUser: RegisterUser, password: string, confirmedPass: string) => {
-        return await fetch("/api/sign/up/confirm", {
+        return await fetch("https://5455-86-49-9-122.ngrok-free.app/api/sign/up/confirm", {
             method: "post",
             headers: {
             'Accept': 'application/json',

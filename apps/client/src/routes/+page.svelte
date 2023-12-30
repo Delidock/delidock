@@ -9,12 +9,17 @@
 	import { onMount } from "svelte";
 	import { goto } from "$app/navigation";
 	import { page } from "$app/stores";
+	import Cookies from "universal-cookie";
     
     let date = new Date()
     let today : string = `${date.toLocaleDateString('en-US', {weekday: 'long'})} ${date.toLocaleString('en-US',{month: 'long'})} ${date.getDate()}`
     let now : string = `${date.getHours()}:${("0"+date.getMinutes()).slice(-2)}:${("0"+date.getSeconds()).slice(-2)}`
 
     onMount(()=>{
+        if (!(new Cookies().get('token'))) {
+            goto('/sign/in', {replaceState: true})
+        }
+
         setInterval(()=> {
             date = new Date()
             today = `${date.toLocaleDateString('en-US', {weekday: 'long'})} ${date.toLocaleString('en-US',{month: 'long'})} ${date.getDate()}`
