@@ -6,10 +6,10 @@ plugins {
 
 android {
     compileSdk = 33
-    namespace = "com.tauri.app"
+    namespace = "com.delidock.app"
     defaultConfig {
         manifestPlaceholders["usesCleartextTraffic"] = "false"
-        applicationId = "com.tauri.app"
+        applicationId = "com.delidock.app"
         minSdk = 24
         targetSdk = 33
         versionCode = 1

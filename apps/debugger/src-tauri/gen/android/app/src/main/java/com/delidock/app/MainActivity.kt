@@ -1,3 +1,3 @@
-package com.tauri.app
+package com.delidock.app
 
 class MainActivity : TauriActivity()

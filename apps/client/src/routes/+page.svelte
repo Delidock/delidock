@@ -3,11 +3,12 @@
 	import { AccountIcon,  PlusIcon } from "$lib/assets/icons";
     import { Doggo } from "$lib/assets/images";
 	import { boxes } from "$lib/stores";
-	import { Box } from "$lib/types";
     import { BoxWidget } from "$lib/components";
 
     import { delidock } from "$lib/utils";
 	import { onMount } from "svelte";
+	import { goto } from "$app/navigation";
+	import { page } from "$app/stores";
     
     let date = new Date()
     let today : string = `${date.toLocaleDateString('en-US', {weekday: 'long'})} ${date.toLocaleString('en-US',{month: 'long'})} ${date.getDate()}`
@@ -19,14 +20,7 @@
             today = `${date.toLocaleDateString('en-US', {weekday: 'long'})} ${date.toLocaleString('en-US',{month: 'long'})} ${date.getDate()}`
             now = `${date.getHours()}:${("0"+date.getMinutes()).slice(-2)}:${("0"+date.getSeconds()).slice(-2)}`
         }, 500)
-    })
-
-    $boxes = [
-        new Box("Mireček", "qhdKKT15", "789456", "superToken", "ws://my.server.app/", false),
-        new Box("Mrdka", "qhdKKT15", "789134", "superToken", "ws://my.server.app/", false),
-        new Box("Mirek", "qhdKKT15", "792856", "superToken", "ws://my.server.app/", false)
-    ]
-
+    })    
     
 </script>
 <section class="min-h-[100svh] w-full bg-background px-4 flex flex-col gap-1 relative pb-8">
@@ -58,9 +52,9 @@
     </div>
     <div class="flex flex-col gap-1">
         <section class="flex flex-col gap-2 items-start">
-            {#if $boxes}
-                {#each $boxes as box}
-                    <BoxWidget box={box}/>
+            {#if $page.data.boxes}
+                {#each $page.data.boxes as box}
+                    <BoxWidget boxData={box} on:click={()=>goto(`/${box.id}`)}/>
                 {/each}
             {/if}
         </section>

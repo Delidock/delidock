@@ -1,4 +1,3 @@
-import { boxes } from "$lib/stores";
 
 export interface RegisterUser {
     firstname: string,
@@ -42,11 +41,7 @@ export class Box {
         return () => this.subscribers.delete(sub)
     }
     private update = () => {
-        boxes.subscribe((x) => {
-            let thisBoxId= x?.findIndex((box) => box.id === this.id)  
-            if (thisBoxId) {
-                x[thisBoxId] = this
-            }
-        })
+
+        
     }
 }

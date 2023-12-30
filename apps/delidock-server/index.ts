@@ -83,7 +83,7 @@ io.on("connection", (socket : Socket)=>{
 app.use(cors())
 app.use(bodyParser.json())
 
-app.post("/sign/up", (req, res) => {
+app.post("/api/sign/up", (req, res) => {
     //DB OPERATIONS
     if (req.body.email !== 'skopek.stepan@gmail.com') {
         res.status(200).send()
@@ -93,7 +93,7 @@ app.post("/sign/up", (req, res) => {
     res.status(409).send()
     
 })
-app.post("/sign/up/confirm", (req, res) => {
+app.post("/api/sign/up/confirm", (req, res) => {
     //DB OPERATIONS
     if ((req.body.email !== 'skopek.stepan@gmail.com') && (req.body.password === req.body.confirmedPass)) {
         res.status(200).send()
@@ -101,7 +101,7 @@ app.post("/sign/up/confirm", (req, res) => {
     res.status(401).send()
 })
 
-app.post("/sign/in", (req, res) => {
+app.post("/api/sign/in", (req, res) => {
 
     //DB OPERATIONS
     if (req.body.password === "KOKOT") {

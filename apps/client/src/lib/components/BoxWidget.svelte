@@ -1,11 +1,13 @@
 <script lang="ts">
 	import { HideEyeIcon, ShowEyeIcon,  ThreeDotIcon, UnlockIcon, ResetIcon } from "$lib/assets/icons";
     import { BoxButton, StatusWidget } from '$lib/components'
-    import {  Box } from '$lib/types'
+	import { Box } from "$lib/types";
 
-    export let box : Box
+    export let boxData : any
 
-    let splittedPin : string = $box.pin.slice(0, ($box.pin.length/2)) + " " + $box.pin.slice(($box.pin.length/2))
+    const box : Box = new Box(boxData.name, boxData.id, boxData.pin, boxData.livekitToken, boxData.livekitServer, boxData.opened)
+
+    let splittedPin : string = $box.pin.slice(0, ($box.pin.length/2)) + " " + box.pin.slice(($box.pin.length/2))
 
     let hiddenCode : boolean = true
     let copyText : boolean = false
@@ -21,11 +23,11 @@
     const changePIN = () => {
         copyText = false
         hiddenCode = true
-        $box.changePIN()
+        box.changePIN()
     }
 
     const unlockBox = () => {
-        $box.unlock()
+        box.unlock()
     }
 
     $: {
@@ -61,7 +63,7 @@
             <BoxButton on:click={()=>changePIN()} label="Change pin" icon={ResetIcon}/>
         </div>
         <div class="aspect-square h-full">
-            <BoxButton icon={ThreeDotIcon}/>
+            <BoxButton icon={ThreeDotIcon} on:click/>
         </div>
     </div>
 </div>

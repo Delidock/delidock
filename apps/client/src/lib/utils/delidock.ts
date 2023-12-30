@@ -2,10 +2,9 @@ import { goto } from "$app/navigation"
 import type { RegisterUser } from "$lib/types"
 import Cookies from "universal-cookie"
 
-
 class Delidock {
     login = async (email: string, password: string) => {
-        return await fetch("http://localhost:3000/sign/in", {
+        return await fetch("/api/sign/in", {
             method: "post",
             headers: {
             'Accept': 'application/json',
@@ -24,7 +23,7 @@ class Delidock {
     }
 
     register = async (email: string) => {
-        return await fetch("http://localhost:3000/sign/up", {
+        return await fetch("/api/sign/up", {
         method: "post",
         body: JSON.stringify({email}),
         headers: {
@@ -35,7 +34,7 @@ class Delidock {
     }
 
     confrimPassword = async (registerUser: RegisterUser, password: string, confirmedPass: string) => {
-        return await fetch("http://localhost:3000/sign/up/confirm", {
+        return await fetch("/api/sign/up/confirm", {
             method: "post",
             headers: {
             'Accept': 'application/json',

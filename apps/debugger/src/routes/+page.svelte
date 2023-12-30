@@ -8,7 +8,7 @@
     onMount(()=>{
         try {
             
-            const connection : Socket= io("ws://localhost:3001", {
+            const connection : Socket= io("ws://10.0.2.2:3001", {
                 auth: {
                     room: userIdFromServer
                 }
