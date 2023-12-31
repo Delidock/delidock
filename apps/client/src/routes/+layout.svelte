@@ -5,8 +5,6 @@
 	import Cookies from "universal-cookie";
 	import { goto } from "$app/navigation";
 
-    export let data
-
     onMount(()=>{
         if ((new Cookies().get('token'))) {
             goto('/', {replaceState: true})

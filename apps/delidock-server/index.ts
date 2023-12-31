@@ -110,5 +110,21 @@ app.post("/api/sign/in", (req, res) => {
     res.status(401).send()
 })
 
+app.post("/api/getLivekitToken", async (req, res) => {
+    if (req.body.id) {
+        const getToken = await fetch("http://localhost:4000/getToken", {
+            method: "POST",
+            body: req.body.id
+        })
+        let token = await getToken.text()
+        if (token) {
+            res.send(token)
+        } else
+        res.status(404).send()
+    } else
+    res.status(404).send()
+    
+})
+
 
 app.listen(3000, ()=>console.log("POSLOUCHAM na 3000, ws 3001"))

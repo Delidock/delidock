@@ -22,7 +22,6 @@ const port = 4000;
 
 app.use(bodyParser.text())
 app.post('/getToken', (req, res) => {
-  console.log(req);
   res.send(createToken(req.body));
 });
 

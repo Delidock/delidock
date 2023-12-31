@@ -31,6 +31,11 @@ export class Box {
         this.notify()
         this.update()
     }
+    updateName(newName: string) {
+        this.name = newName
+    }
+
+
     subscribers = new Set()
     notify = () => {
         this.subscribers.forEach((sub : any) => sub(this))
