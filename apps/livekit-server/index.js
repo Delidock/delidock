@@ -3,9 +3,9 @@ import bodyParser from 'body-parser';
 import express from 'express';
 import { AccessToken } from 'livekit-server-sdk';
 
-const createToken = (name) => {
+const createToken = (room, name) => {
 
-  const roomName = 'quickstart-room';
+  const roomName = `room:${room}`;
 
   const participantName = name;
 
@@ -20,9 +20,9 @@ const createToken = (name) => {
 const app = express();
 const port = 4000;
 
-app.use(bodyParser.text())
+app.use(bodyParser.json())
 app.post('/getToken', (req, res) => {
-  res.send(createToken(req.body));
+  res.send(createToken(req.body.id, req.body.client));
 });
 
 app.listen(port, () => {

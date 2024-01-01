@@ -35,6 +35,9 @@ importers:
       '@capacitor/keyboard':
         specifier: ^5.0.7
         version: 5.0.7(@capacitor/core@5.6.0)
+      livekit-client:
+        specifier: ^1.15.5
+        version: 1.15.5
       universal-cookie:
         specifier: ^6.1.1
         version: 6.1.1
@@ -3045,6 +3048,19 @@ packages:
 
   /livekit-client@1.15.3:
     resolution: {integrity: sha512-1NPcLgQoBIUkEPxP6ob5wvNS+aphxmayHhpkfFRYmQOsr+AjjN1R5FVYWc/eeXeu6pbOzMSwc4dwH1o2MsPsFg==}
+    dependencies:
+      '@bufbuild/protobuf': 1.5.1
+      events: 3.3.0
+      loglevel: 1.8.1
+      sdp-transform: 2.14.1
+      ts-debounce: 4.0.0
+      tslib: 2.6.2
+      typed-emitter: 2.1.0
+      webrtc-adapter: 8.2.3
+    dev: false
+
+  /livekit-client@1.15.5:
+    resolution: {integrity: sha512-Kg2pUXZs/Oi+RdZr7WaBeJ/+IYEpl9qRB4nzVvoTDSxp+cdqC/i9JL7yNE4UdMzAEblLvVsbaAt6yv8H8Pdrog==}
     dependencies:
       '@bufbuild/protobuf': 1.5.1
       events: 3.3.0

@@ -3,34 +3,40 @@
     import { GearIcon, LeftArrowIcon, EditPenIcon, CheckmarkIcon, CameraIcon } from '$lib/assets/icons'
 	import { StatusWidget } from '$lib/components';
     import { Box } from '$lib/types/index.js';
-    import placeholder from '$lib/assets/placeholder.mp4'
 
-	import { onMount, tick } from 'svelte';
+	import { tick } from 'svelte';
 	import PinBox from '$lib/components/PINBox.svelte';
+	import { delidock } from '$lib/utils/delidock.js';
+
+    import { Participant, RemoteParticipant, Room, RoomEvent, Track, VideoPresets, type RoomOptions } from 'livekit-client';
+	import ResetIcon from '$lib/assets/icons/ResetIcon.svelte';
+
     export let data
 
-    const box = new Box(data.box.name, data.box.id, data.box.pin, data.box.livekitToken, data.box.livekitServer, data.box.opened)
-    
+    const box : Box = new Box(data.box.name, data.box.id, data.box.pin, data.box.livekitToken, data.box.livekitServer, data.box.opened)
+
     let boxName : string = "LMAO"
     let nameInput : HTMLInputElement
     let inputDisabled : boolean = true
     let nameError = false
     let errorUnderline = false
+
     let livekitConnected = false
-    
+    let boxVideo : HTMLVideoElement
+
     const editName = async () => {
         inputDisabled = false
         const autofocus = async (nameInput: HTMLInputElement) => {
             await tick();
-            nameInput.focus();  
-            nameInput.setSelectionRange(0, nameInput.value.length)       
+            nameInput.focus();
+            nameInput.setSelectionRange(0, nameInput.value.length)
         };
         autofocus(nameInput)
-    } 
+    }
     const regex = /[\p{Letter}\p{Mark}]+/gu
     const updateBoxName = () => {
 
-        boxName = boxName.match(regex)?.join("") ?? ""      
+        boxName = boxName.match(regex)?.join("") ?? ""
         if (!inputDisabled) {
             if (boxName.length >= 3){
                 inputDisabled = true
@@ -41,12 +47,12 @@
                 nameInput.focus()
                 setTimeout(()=>{
                     nameError = false
-                
+
                 }, 500)
             }
         }
     }
-    
+
     $: {
         if (boxName.length < 3) {
             errorUnderline = true
@@ -56,14 +62,88 @@
     }
 
     //Livekit
-    const tryConnect = () => {
+    const tryConnect = async () => {
         livekitConnected = true
+
+        let token = await (await delidock.getLivekitToken($box.id, "mirek")).text()
+        token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ2aWRlbyI6eyJyb29tSm9pbiI6dHJ1ZSwicm9vbSI6InJvb206cWhkS0tUMSJ9LCJpYXQiOjE3MDQxNDU0MjgsIm5iZiI6MTcwNDE0NTQyOCwiZXhwIjoxNzA0MTY3MDI4LCJpc3MiOiJkZXZrZXkiLCJzdWIiOiJtaXJlayIsImp0aSI6Im1pcmVrIn0.LV3yXr-AIaiV_cTbGuVjfQ9814CeCy7BtMLhKhCYSzI"
+        
+        const livekitSignal = $box.livekitIP
+        
+        console.log(livekitSignal);
+        console.log(token);
+
+        handleConnect(token, livekitSignal)
+
     }
 
     let copyText = false
     const changePIN = () => {
         copyText = false
         box.changePIN()
+    }
+
+
+
+    //LIVEKIT
+    let isVideo : boolean
+
+    const handleConnect = (token: string, url: string) => {
+        actions.connectionPrep(token, url)
+    }
+
+    const actions = {
+        connectionPrep: async (token : string, url: string)=>{
+
+            const roomOpts : RoomOptions = {
+                adaptiveStream: true,
+                dynacast: true,
+                videoCaptureDefaults: {
+                    resolution: VideoPresets.h720.resolution,
+                },
+                audioOutput: {
+                    deviceId: "046d:0aba",
+                },
+            };
+            await actions.connecToRoom(token, url, roomOpts)
+        },
+        connecToRoom: async (token : string, url : string, roomOpts: RoomOptions)=>{
+            const room = new Room(roomOpts)
+            await room.prepareConnection(url, token)
+
+            room
+            .on(RoomEvent.ParticipantConnected, participantConnected)
+            .on(RoomEvent.ParticipantDisconnected, participantDisconnected)
+            .on(RoomEvent.TrackSubscribed, (track ,pub, participant)=>{
+                renderParticipant(participant);
+                isVideo = true
+            })
+            .on(RoomEvent.TrackUnsubscribed, (_, pub, participant) => {
+                renderParticipant(participant);
+            })
+
+            await room.connect(url, token, {autoSubscribe: true})
+        }
+    }
+
+    const participantConnected = (participant: Participant) => {
+        renderParticipant(participant)
+    }
+    const participantDisconnected = (participant: RemoteParticipant)=> {
+        renderParticipant(participant, true)
+    }
+    const renderParticipant = (participant: Participant, remove: boolean = false) => {
+        if (!remove && participant instanceof RemoteParticipant) {
+            const cameraPub = participant.getTrack(Track.Source.Camera)
+            if (cameraPub?.videoTrack) {
+                cameraPub.videoTrack?.attach(boxVideo)
+            } else {
+                isVideo = false
+            }
+        } else if (remove && participant instanceof RemoteParticipant) {
+            isVideo = false
+            livekitConnected = false
+        }
     }
 </script>
 <div class="w-full min-h-screen bg-background pt-4 flex flex-col gap-4">
@@ -80,7 +160,7 @@
                     <CheckmarkIcon/>
                 </button>
             {/if}
-            
+
         </div>
         <button class="active:scale-90 transition-transform ease-in-out"><GearIcon/></button>
     </div>
@@ -90,17 +170,24 @@
             <StatusWidget open={$box.opened} />
         </div>
 
-        <div class="w-full aspect-video rounded-lg border border-outline video-gradient justify-center items-center flex relative">
+        <div class="w-full min-h-[12rem] rounded-lg border border-outline video-gradient justify-center items-center flex relative overflow-hidden">
             {#if livekitConnected}
-                    <video src={placeholder} class="w-full h-full" autoplay>
-                        <track kind="captions">
+                    <!-- svelte-ignore a11y-media-has-caption -->
+                    <video bind:this={boxVideo} class:hidden={!isVideo} class="w-full overflow-hidden" src="">
                     </video>
-                    <button class="active:scale-90 transition-transform ease-in-out absolute bottom-2 right-2"><GearIcon/></button>
+                    {#if !isVideo}
+                        <div class="animate-spin absolute w-full h-full justify-center items-center flex">
+                            <ResetIcon/>
+                        </div>
+                        {:else}
+                        <button class="active:scale-90 transition-transform ease-in-out absolute bottom-2 right-2"><GearIcon/></button>
+                    {/if}
+                    
                 {:else}
                     <button on:click={()=>tryConnect()} class="active:scale-90 transition-transform ease-in-out"><CameraIcon/></button>
             {/if}
         </div>
-        
+
         <div class="w-full h-48">
             <PinBox box={$box} copyText={copyText}/>
         </div>
@@ -129,6 +216,6 @@
 
     .invalid {
     animation: shake 0.2s ease-in-out 0s 2;
-        
+
     }
 </style>

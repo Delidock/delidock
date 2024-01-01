@@ -35,10 +35,10 @@ class Delidock {
     })   
     }
 
-    getLivekitToken = async (id: string) => {
+    getLivekitToken = async (id: string, client: string) => {
         return await fetch(`${api}/api/getLivekitToken`, {
             method: "POST",
-            body: JSON.stringify({id}),
+            body: JSON.stringify({id, client}),
             headers: {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json'

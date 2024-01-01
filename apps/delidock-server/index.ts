@@ -111,10 +111,17 @@ app.post("/api/sign/in", (req, res) => {
 })
 
 app.post("/api/getLivekitToken", async (req, res) => {
-    if (req.body.id) {
+    if (req.body.id && req.body.client) {
         const getToken = await fetch("http://localhost:4000/getToken", {
             method: "POST",
-            body: req.body.id
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                id: req.body.id,
+                client: req.body.client
+            })
         })
         let token = await getToken.text()
         if (token) {

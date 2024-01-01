@@ -17,7 +17,7 @@
 
     onMount(()=>{
         if (!(new Cookies().get('token'))) {
-            goto('/sign/in', {replaceState: true})
+            //goto('/sign/in', {replaceState: true})
         }
 
         setInterval(()=> {
