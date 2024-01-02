@@ -25,9 +25,9 @@
                 if (true) {
                     const cookies = new Cookies()
                     cookies.set("token", token, {
-                        secure: true,
-                        path: "/",
-                        sameSite: "strict"
+                            secure: true,
+                            path: "/",
+                            sameSite: "strict"
                         }
                     )
                 }
@@ -41,6 +41,8 @@
                 emailError = "Invalid credentials"
                 break
             default:
+                passwordError = ""
+                emailError = ""
                 passwordError = "Something went wrong"
                 emailError = "Something went wrong"
                 break;
@@ -52,7 +54,7 @@
         <h1 class="text-text_color text-2xl flex mb-4">Login</h1>
         <form on:submit|preventDefault={()=>handleLogin()} class="flex-col flex w-full gap-2">
             <div class="flex flex-col gap-3">
-                <InputField icon={EmailIcon} label="Email" type="email" value={email} error={emailError}/>
+                <InputField icon={EmailIcon} label="Email" type="email" bind:value={email} error={emailError}/>
                 <InputField icon={PasswordIcon} label="Password" type="password" bind:value={password} error={passwordError}/>
             </div>
             <div class="flex flex-row justify-between">

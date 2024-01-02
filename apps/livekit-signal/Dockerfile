@@ -6,5 +6,6 @@ RUN apt update
 RUN apt install curl -y
 
 RUN curl -sSL https://get.livekit.io | bash
+COPY ./config-sample.yaml ./
 
 ENTRYPOINT [ "bash", "setup.sh" ]

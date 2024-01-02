@@ -1,27 +1,28 @@
 <script lang="ts">
     import { goto } from '$app/navigation';
-    import { GearIcon, LeftArrowIcon, EditPenIcon, CheckmarkIcon, CameraIcon } from '$lib/assets/icons'
-	import { StatusWidget } from '$lib/components';
-    import { Box } from '$lib/types/index.js';
+    import { GlobeIcon, GearIcon, LeftArrowIcon, EditPenIcon, CheckmarkIcon, CameraIcon, BoxIcon, CrossIcon } from '$lib/assets/icons'
+	import { StatusWidget, BoxButton} from '$lib/components';
+    import { Box, LivekitDisconnected, LivekitState } from '$lib/types';
 
 	import { tick } from 'svelte';
 	import PinBox from '$lib/components/PINBox.svelte';
 	import { delidock } from '$lib/utils/delidock.js';
 
-    import { Participant, RemoteParticipant, Room, RoomEvent, Track, VideoPresets, type RoomOptions } from 'livekit-client';
-	import ResetIcon from '$lib/assets/icons/ResetIcon.svelte';
+    import { Participant, RemoteParticipant, Room, RoomEvent, Track, type RoomOptions } from 'livekit-client';
 
     export let data
 
     const box : Box = new Box(data.box.name, data.box.id, data.box.pin, data.box.livekitToken, data.box.livekitServer, data.box.opened)
 
-    let boxName : string = "LMAO"
+    let boxName : string = $box.name
     let nameInput : HTMLInputElement
     let inputDisabled : boolean = true
     let nameError = false
     let errorUnderline = false
 
-    let livekitConnected = false
+
+   
+
     let boxVideo : HTMLVideoElement
 
     const editName = async () => {
@@ -60,23 +61,7 @@
             errorUnderline = false
         }
     }
-
-    //Livekit
-    const tryConnect = async () => {
-        livekitConnected = true
-
-        let token = await (await delidock.getLivekitToken($box.id, "mirek")).text()
-        token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ2aWRlbyI6eyJyb29tSm9pbiI6dHJ1ZSwicm9vbSI6InJvb206cWhkS0tUMSJ9LCJpYXQiOjE3MDQxNDU0MjgsIm5iZiI6MTcwNDE0NTQyOCwiZXhwIjoxNzA0MTY3MDI4LCJpc3MiOiJkZXZrZXkiLCJzdWIiOiJtaXJlayIsImp0aSI6Im1pcmVrIn0.LV3yXr-AIaiV_cTbGuVjfQ9814CeCy7BtMLhKhCYSzI"
-        
-        const livekitSignal = $box.livekitIP
-        
-        console.log(livekitSignal);
-        console.log(token);
-
-        handleConnect(token, livekitSignal)
-
-    }
-
+    
     let copyText = false
     const changePIN = () => {
         copyText = false
@@ -86,43 +71,73 @@
 
 
     //LIVEKIT
-    let isVideo : boolean
+    let cancelButton : boolean = false
+    let livekitState : LivekitState = LivekitState.DISCONNECTED
+    let livekitDisconnected : LivekitDisconnected
 
-    const handleConnect = (token: string, url: string) => {
-        actions.connectionPrep(token, url)
+    let currentRoom: Room | undefined;
+
+    const tryConnect = async () => {
+        livekitState = LivekitState.VIEW
+        
+        //let token = await (await delidock.getLivekitToken($box.id, "mirek")).text()
+        const livekitSignal = $box.livekitIP
+
+        let token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ2aWRlbyI6eyJyb29tSm9pbiI6dHJ1ZSwicm9vbSI6InJvb206cWhkS0tUMSJ9LCJpYXQiOjE3MDQyMjU1MDYsIm5iZiI6MTcwNDIyNTUwNiwiZXhwIjoxNzA0MjQ3MTA2LCJpc3MiOiJkZXZrZXkiLCJzdWIiOiJtaXJlayIsImp0aSI6Im1pcmVrIn0.Ci6KmJnoGuXCBM4mjuM4qIqxrvWfF4xuEJA90PXUYnU"
+        liveKit.connectionPrep(token, livekitSignal)
     }
 
-    const actions = {
+    const stopConnection = () => {
+        liveKit.disconnect()
+    }
+
+    const liveKit = {
         connectionPrep: async (token : string, url: string)=>{
 
             const roomOpts : RoomOptions = {
                 adaptiveStream: true,
                 dynacast: true,
-                videoCaptureDefaults: {
-                    resolution: VideoPresets.h720.resolution,
-                },
-                audioOutput: {
-                    deviceId: "046d:0aba",
-                },
+                publishDefaults: {
+                    simulcast: true
+                }
             };
-            await actions.connecToRoom(token, url, roomOpts)
+            await liveKit.connecToRoom(token, url, roomOpts)
         },
         connecToRoom: async (token : string, url : string, roomOpts: RoomOptions)=>{
             const room = new Room(roomOpts)
             await room.prepareConnection(url, token)
+            
+            currentRoom = room
 
             room
             .on(RoomEvent.ParticipantConnected, participantConnected)
             .on(RoomEvent.ParticipantDisconnected, participantDisconnected)
             .on(RoomEvent.TrackSubscribed, (track ,pub, participant)=>{
                 renderParticipant(participant);
-                isVideo = true
+                
             })
             .on(RoomEvent.TrackUnsubscribed, (_, pub, participant) => {
                 renderParticipant(participant);
             })
+            .on(RoomEvent.Connected, () => {                
+                livekitState = LivekitState.CONNECTED
+            })
+            .on(RoomEvent.TrackMuted, (pub, participant) => {
+                renderParticipant(participant);
+            })
+            .on(RoomEvent.TrackUnmuted, (pub, participant) => {
+                renderParticipant(participant);
+            })
+            .on(RoomEvent.Disconnected, ()=> {
+                livekitState = LivekitState.DISCONNECTED
+            })
 
             await room.connect(url, token, {autoSubscribe: true})
+        },
+        disconnect: async () => {
+            livekitState = LivekitState.DISCONNECTED
+            if(currentRoom)
+                currentRoom.disconnect()
         }
     }
 
@@ -133,18 +148,28 @@
         renderParticipant(participant, true)
     }
     const renderParticipant = (participant: Participant, remove: boolean = false) => {
-        if (!remove && participant instanceof RemoteParticipant) {
+        if ((!remove && participant instanceof RemoteParticipant) && participant.identity === `box:${$box.id}`) {
+
+            livekitState = LivekitState.BOXCONNECTED
             const cameraPub = participant.getTrack(Track.Source.Camera)
             if (cameraPub?.videoTrack) {
                 cameraPub.videoTrack?.attach(boxVideo)
+
+                if (cameraPub.videoTrack.isMuted) {
+                    livekitState = LivekitState.BOXCONNECTED
+                } else {
+                    livekitState = LivekitState.BOXVIDEO
+                }
             } else {
-                isVideo = false
+                livekitState = LivekitState.BOXCONNECTED
             }
         } else if (remove && participant instanceof RemoteParticipant) {
-            isVideo = false
-            livekitConnected = false
+            
+            
+            livekitState = LivekitState.CONNECTED
         }
     }
+    
 </script>
 <div class="w-full min-h-screen bg-background pt-4 flex flex-col gap-4">
     <div class="flex flex-row items-center justify-between px-4">
@@ -170,22 +195,35 @@
             <StatusWidget open={$box.opened} />
         </div>
 
-        <div class="w-full min-h-[12rem] rounded-lg border border-outline video-gradient justify-center items-center flex relative overflow-hidden">
-            {#if livekitConnected}
-                    <!-- svelte-ignore a11y-media-has-caption -->
-                    <video bind:this={boxVideo} class:hidden={!isVideo} class="w-full overflow-hidden" src="">
-                    </video>
-                    {#if !isVideo}
-                        <div class="animate-spin absolute w-full h-full justify-center items-center flex">
-                            <ResetIcon/>
+        <div class="transition-all ease-in-out text-text_color w-full aspect-[4/3] rounded-lg border border-outline justify-center items-center flex flex-row relative overflow-hidden" class:video-inactive={(livekitState === LivekitState.DISCONNECTED)} class:video-gradient={(livekitState > LivekitState.DISCONNECTED)} >
+
+
+            {#if livekitState >= LivekitState.VIEW}
+                <!-- svelte-ignore a11y-media-has-caption -->
+                <video bind:this={boxVideo} class:hidden={(livekitState < LivekitState.BOXVIDEO)} class="w-full overflow-hidden aspect-[4/3]" src=""></video>
+                    <button on:click={()=>stopConnection()} class="bg-red rounded-lg p-[1px] absolute top-2 right-2 active:scale-90"><CrossIcon/></button>
+                    {#if livekitState === LivekitState.VIEW}
+                        <div class="flex flex-row justify-center items-center gap-4">
+                            <p>Connecting</p>
+                            <div class="animate-spin"><GlobeIcon/></div>
                         </div>
-                        {:else}
-                        <button class="active:scale-90 transition-transform ease-in-out absolute bottom-2 right-2"><GearIcon/></button>
                     {/if}
-                    
+                    {#if livekitState === LivekitState.CONNECTED}
+                        <div class="flex flex-row justify-center items-center gap-4">
+                            <p>Waiting for box</p>
+                            <div class="animate-bounce"><BoxIcon/></div>
+                        </div>
+                    {/if}
+                    {#if livekitState === LivekitState.BOXCONNECTED}
+                        <div class="flex flex-row justify-center items-center gap-4">
+                            <p>Waiting for video</p>
+                            <div class="animate-pulse"><CameraIcon/></div>
+                        </div>
+                    {/if}
                 {:else}
-                    <button on:click={()=>tryConnect()} class="active:scale-90 transition-transform ease-in-out"><CameraIcon/></button>
+                <div class="h-16 w-1/3"><BoxButton label="View" icon={CameraIcon} on:click={()=>tryConnect()}/></div>
             {/if}
+            
         </div>
 
         <div class="w-full h-48">
@@ -197,7 +235,11 @@
 
     .video-gradient {
         background: radial-gradient(385.51% 138.87% at 100% 96.36%, #1A1249 0%, rgba(36, 64, 118, 0.33) 51.7%, rgba(84, 54, 204, 0.42) 100%);
-        box-shadow: 0px 0px 156.3px 23px rgba(0, 0, 0, 0.98) inset, 0px 4px 4px 0px rgba(0, 0, 0, 0.25), 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
+        box-shadow: 0px 0px 90px 2px rgba(0, 0, 0, 0.98) inset, 0px 4px 4px 0px rgba(0, 0, 0, 0.25), 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
+    }
+    .video-inactive {
+        background: radial-gradient(385.51% 138.87% at 100% 96.36%, #140e388e 0%, rgba(9, 16, 29, 0.719) 51.7%, rgba(18, 12, 39, 0.753) 100%);
+        box-shadow: 0px 0px 200px 60px rgba(0, 0, 0, 0.98) inset, 0px 4px 4px 0px rgba(0, 0, 0, 0.25), 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
     }
     @keyframes shake {
         0% {
