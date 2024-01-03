@@ -3,7 +3,7 @@ import type { RegisterUser } from "$lib/types"
 import Cookies from "universal-cookie"
 
 
-const api : string = "https://dev.stepskop.xyz/api"
+const api : string = "https://delidock.stepskop.xyz/api"
 class Delidock {
     login = async (email: string, password: string) => {
         return await fetch(`${api}/sign/in`, {
