@@ -32,7 +32,7 @@
                     )
                 }
                 formReset()
-                goto("/", { replaceState: true})
+                goto("/home", { replaceState: true})
                 break;
             case 401:
                 passwordError = ""

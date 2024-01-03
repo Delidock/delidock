@@ -1,10 +1,11 @@
 import type { LayoutLoad } from "./$types";
+
 export const load: LayoutLoad = async ({url}) => {
     
     return {
         url: url.pathname,
         boxes: [
-            { name: "Mireček", id: "qhdKKT1", pin: "789456", livekitToken: "superToken", livekitServer: "wss://livekit.stepskop.xyz", opened: false },
+            { name: "Mireček", id: "qhdKKT1", pin: "789456", livekitToken: "superToken", livekitServer: "wss://delidock.stepskop.xyz", opened: false },
             { name: "Janek", id: "xdLmao2", pin: "989456", livekitToken: "superToken", livekitServer: "ws://my.server.app/", opened: false },
             { name: "Mánička", id: "kmotr15", pin: "419456", livekitToken: "superToken", livekitServer: "ws://my.server.app/", opened: false },
         ]

@@ -1,7 +1,17 @@
 <script lang="ts">
+	import { goto } from "$app/navigation";
 	import { Doggo } from "$lib/assets/images";
+	import { delidock } from "$lib/utils/delidock.js";
+	import { onMount } from "svelte";
     
 	import { fly } from "svelte/transition";
+
+    onMount(()=> {
+        if (delidock.checkToken()) {
+            goto('/home', {replaceState: true})
+        }
+    })
+
     export let data
 
 </script>

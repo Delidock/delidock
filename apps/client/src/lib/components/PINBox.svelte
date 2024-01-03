@@ -22,7 +22,7 @@
         hiddenCode
     }
 </script>
-<div class="border-btn_secondary h-[55%] rounded-lg border-[1px] flex justify-center items-center relative text-text_color ">
+<div class="border-btn_secondary h-full rounded-lg border-[1px] flex justify-center items-center relative text-text_color ">
     {#if !copyText}
             <button class="text-5xl tracking-widest" class:blur={hiddenCode} on:click={()=>copy()}>{splittedPin}</button>
         {:else}

@@ -24,7 +24,9 @@
         <h4>{$box.name}</h4>
         <StatusWidget open={$box.status}/>
     </div>
-    <PinBox box={$box} copyText={copyText}/>
+    <div class="h-[55%]">
+        <PinBox box={$box} copyText={copyText}/>
+    </div>
     <div class="flex flex-row gap-2 h-[35%]">
         <div class="flex flex-row gap-2 w-full">
             <BoxButton on:click={()=>unlockBox()} label="Unlock" icon={UnlockIcon}/>

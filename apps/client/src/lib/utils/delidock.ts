@@ -3,10 +3,10 @@ import type { RegisterUser } from "$lib/types"
 import Cookies from "universal-cookie"
 
 
-const api : string = "http://localhost:3000"
+const api : string = "https://dev.stepskop.xyz/api"
 class Delidock {
     login = async (email: string, password: string) => {
-        return await fetch(`${api}/api/sign/in`, {
+        return await fetch(`${api}/sign/in`, {
             method: "post",
             headers: {
             'Accept': 'application/json',
@@ -25,7 +25,7 @@ class Delidock {
     }
 
     register = async (email: string) => {
-        return await fetch(`${api}/api/sign/up`, {
+        return await fetch(`${api}/sign/up`, {
         method: "post",
         body: JSON.stringify({email}),
         headers: {
@@ -36,7 +36,7 @@ class Delidock {
     }
 
     getLivekitToken = async (id: string, client: string) => {
-        return await fetch(`${api}/api/getLivekitToken`, {
+        return await fetch(`${api}/getToken`, {
             method: "POST",
             body: JSON.stringify({id, client}),
             headers: {
@@ -47,7 +47,7 @@ class Delidock {
     }
 
     confrimPassword = async (registerUser: RegisterUser, password: string, confirmedPass: string) => {
-        return await fetch(`${api}/api/sign/up/confirm`, {
+        return await fetch(`${api}/sign/up/confirm`, {
             method: "post",
             headers: {
             'Accept': 'application/json',
@@ -55,6 +55,20 @@ class Delidock {
             },
             body: JSON.stringify({...registerUser, password, confirmedPass})
         })
+    }
+
+    checkToken = () => {
+        console.log("Checking token");
+        
+        const isValid = true
+        if ((new Cookies().get('token')) && (isValid)) {
+            return true
+        } else
+            return false
+    }
+
+    socketConnection = () => {
+        
     }
 }
 

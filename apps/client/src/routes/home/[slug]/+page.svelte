@@ -1,11 +1,10 @@
 <script lang="ts">
     import { goto } from '$app/navigation';
-    import { GlobeIcon, GearIcon, LeftArrowIcon, EditPenIcon, CheckmarkIcon, CameraIcon, BoxIcon, CrossIcon } from '$lib/assets/icons'
-	import { StatusWidget, BoxButton} from '$lib/components';
-    import { Box, LivekitDisconnected, LivekitState } from '$lib/types';
+    import { GlobeIcon, GearIcon, LeftArrowIcon, EditPenIcon, CheckmarkIcon, CameraIcon, BoxIcon, CrossIcon, ResetIcon, UnlockIcon, BigCrossIcon } from '$lib/assets/icons'
+	import { StatusWidget, BoxButton, PinBox} from '$lib/components';
+    import { Box, LivekitState } from '$lib/types';
 
 	import { tick } from 'svelte';
-	import PinBox from '$lib/components/PINBox.svelte';
 	import { delidock } from '$lib/utils/delidock.js';
 
     import { Participant, RemoteParticipant, Room, RoomEvent, Track, type RoomOptions } from 'livekit-client';
@@ -19,9 +18,6 @@
     let inputDisabled : boolean = true
     let nameError = false
     let errorUnderline = false
-
-
-   
 
     let boxVideo : HTMLVideoElement
 
@@ -63,27 +59,25 @@
     }
     
     let copyText = false
+
     const changePIN = () => {
         copyText = false
         box.changePIN()
+        console.log($box);
+        
     }
 
-
-
     //LIVEKIT
-    let cancelButton : boolean = false
     let livekitState : LivekitState = LivekitState.DISCONNECTED
-    let livekitDisconnected : LivekitDisconnected
 
     let currentRoom: Room | undefined;
 
     const tryConnect = async () => {
         livekitState = LivekitState.VIEW
         
-        //let token = await (await delidock.getLivekitToken($box.id, "mirek")).text()
+        let token = await (await delidock.getLivekitToken($box.id, "mirek")).text()
         const livekitSignal = $box.livekitIP
 
-        let token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ2aWRlbyI6eyJyb29tSm9pbiI6dHJ1ZSwicm9vbSI6InJvb206cWhkS0tUMSJ9LCJpYXQiOjE3MDQyMjU1MDYsIm5iZiI6MTcwNDIyNTUwNiwiZXhwIjoxNzA0MjQ3MTA2LCJpc3MiOiJkZXZrZXkiLCJzdWIiOiJtaXJlayIsImp0aSI6Im1pcmVrIn0.Ci6KmJnoGuXCBM4mjuM4qIqxrvWfF4xuEJA90PXUYnU"
         liveKit.connectionPrep(token, livekitSignal)
     }
 
@@ -172,8 +166,8 @@
     
 </script>
 <div class="w-full min-h-screen bg-background pt-4 flex flex-col gap-4">
-    <div class="flex flex-row items-center justify-between px-4">
-        <button on:click|preventDefault={()=>goto("/")} class=" active:scale-90 transition-transform ease-in-out"><LeftArrowIcon/></button>
+    <div class="flex flex-row items-center justify-between px-4 h-8">
+        <button on:click|preventDefault={()=>goto("/home")} class=" active:scale-90 transition-transform ease-in-out"><BigCrossIcon/></button>
         <div class="flex flex-row gap-2" class:invalid={nameError} >
             <input class:text-red={errorUnderline}  spellcheck="false" maxlength="20" on:keydown={(e) => e.key === 'Enter' && updateBoxName()} class=" text-center outline-none text-text_color bg-transparent" disabled='{inputDisabled}' type="text" style="width: {boxName.length}ch" bind:this={nameInput} bind:value={boxName} >
             {#if inputDisabled}
@@ -190,9 +184,9 @@
         <button class="active:scale-90 transition-transform ease-in-out"><GearIcon/></button>
     </div>
 
-    <section class="w-full h-screen bg-secondary rounded-t-[2rem] flex flex-col gap-2 px-4 pt-4">
+    <section class="w-full min-h-[calc(100svh-4rem)] bg-secondary rounded-t-[2rem] flex flex-col gap-2 px-4 pt-4">
         <div class="w-full justify-end flex">
-            <StatusWidget open={$box.opened} />
+            <StatusWidget open={$box.status} />
         </div>
 
         <div class="transition-all ease-in-out text-text_color w-full aspect-[4/3] rounded-lg border border-outline justify-center items-center flex flex-row relative overflow-hidden" class:video-inactive={(livekitState === LivekitState.DISCONNECTED)} class:video-gradient={(livekitState > LivekitState.DISCONNECTED)} >
@@ -201,7 +195,7 @@
             {#if livekitState >= LivekitState.VIEW}
                 <!-- svelte-ignore a11y-media-has-caption -->
                 <video bind:this={boxVideo} class:hidden={(livekitState < LivekitState.BOXVIDEO)} class="w-full overflow-hidden aspect-[4/3]" src=""></video>
-                    <button on:click={()=>stopConnection()} class="bg-red rounded-lg p-[1px] absolute top-2 right-2 active:scale-90"><CrossIcon/></button>
+                    <button on:click={()=>stopConnection()} class="bg-red rounded-lg p-[1px] absolute top-2 right-2 active:scale-90 transition-transform ease-in-out"><CrossIcon/></button>
                     {#if livekitState === LivekitState.VIEW}
                         <div class="flex flex-row justify-center items-center gap-4">
                             <p>Connecting</p>
@@ -226,9 +220,17 @@
             
         </div>
 
-        <div class="w-full h-48">
-            <PinBox box={$box} copyText={copyText}/>
+        <div class="w-full h-48 flex flex-col gap-2">
+            <div class="h-1/2">
+                <PinBox box={$box} copyText={copyText}/>
+            </div>
+            <div class="w-full flex flex-row gap-1 h-1/3">
+                <BoxButton label="Unlock" icon={UnlockIcon} on:click={()=>box.unlock()}/>
+                <BoxButton label="Change PIN" icon={ResetIcon} on:click={()=>changePIN()}/>
+            </div>
         </div>
+
+        
     </section>
 </div>
 <style>

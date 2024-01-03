@@ -3,6 +3,7 @@ import { Server, Socket } from 'socket.io'
 import { instrument } from "@socket.io/admin-ui";
 import cors from 'cors'
 import bodyParser from 'body-parser'
+import { AccessToken } from 'livekit-server-sdk';
 
 const app : Express = express()
 const io = new Server(3001, {cors:{
@@ -133,5 +134,23 @@ app.post("/api/getLivekitToken", async (req, res) => {
     
 })
 
+
+//LIVEKIT
+const createToken = (room: string, name:string) => {
+
+    const roomName = `room:${room}`;
+
+    const participantName = name;
+
+    const at = new AccessToken('devkey', 'secret', {
+        identity: participantName,
+    });
+    at.addGrant({ roomJoin: true, room: roomName });
+
+    return at.toJwt();
+}
+app.post('/api/getToken', (req, res) => {
+    res.send(createToken(req.body.id, req.body.client));
+  });
 
 app.listen(3000, ()=>console.log("POSLOUCHAM na 3000, ws 3001"))

@@ -199,6 +199,9 @@ importers:
       livekit-client:
         specifier: ^1.15.2
         version: 1.15.3
+      livekit-server-sdk:
+        specifier: ^1.2.7
+        version: 1.2.7
       socket.io:
         specifier: ^4.7.2
         version: 4.7.2
