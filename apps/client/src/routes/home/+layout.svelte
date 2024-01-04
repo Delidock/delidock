@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { SplashScreen } from '@capacitor/splash-screen';
 	import { goto } from "$app/navigation";
 	import { delidock } from "$lib/utils";
 	import { onMount } from "svelte";
@@ -6,10 +7,11 @@
     
     export let data
 
-    onMount(()=> {
+    onMount( async ()=> {
         if (!delidock.checkToken()) {
             goto('/sign/in', {replaceState: true})
         }
+        await SplashScreen.hide();
     })
 
 </script>

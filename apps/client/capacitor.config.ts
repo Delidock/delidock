@@ -1,3 +1,4 @@
+/// <reference types="@capacitor/splash-screen" />
 import { CapacitorConfig } from '@capacitor/cli';
 import { KeyboardResize, KeyboardStyle } from '@capacitor/keyboard';
 const config: CapacitorConfig = {
@@ -13,6 +14,12 @@ const config: CapacitorConfig = {
     },
     CapacitorHttp: {
       enabled: true,
+    },
+    SplashScreen: {
+      launchAutoHide: false,
+      backgroundColor: '#111124',
+      launchFadeOutDuration: 0,
+      
     },
   }
 };

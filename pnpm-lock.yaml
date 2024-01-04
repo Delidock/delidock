@@ -35,6 +35,9 @@ importers:
       '@capacitor/keyboard':
         specifier: ^5.0.7
         version: 5.0.7(@capacitor/core@5.6.0)
+      '@capacitor/splash-screen':
+        specifier: ^5.0.6
+        version: 5.0.6(@capacitor/core@5.6.0)
       livekit-client:
         specifier: ^1.15.5
         version: 1.15.5
@@ -420,6 +423,14 @@ packages:
 
   /@capacitor/keyboard@5.0.7(@capacitor/core@5.6.0):
     resolution: {integrity: sha512-+6lW8z2nXTM2NOG7D7pOasCfIGicz26+EeDRXIj5AtJibbjwtE1Q5GIY+qGHgzpmwOF0qmcrGJBz4zagDwUapg==}
+    peerDependencies:
+      '@capacitor/core': ^5.0.0
+    dependencies:
+      '@capacitor/core': 5.6.0
+    dev: false
+
+  /@capacitor/splash-screen@5.0.6(@capacitor/core@5.6.0):
+    resolution: {integrity: sha512-9B8wSm89D+LlshFw8B+mjPU8pJNf1WOx2mkMjMvcH0/EqxNaE+ZaO8lPCX+9WvWSEZs3O3l11qiSnOFHeK0t9A==}
     peerDependencies:
       '@capacitor/core': ^5.0.0
     dependencies:

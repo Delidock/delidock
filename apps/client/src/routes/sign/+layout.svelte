@@ -1,15 +1,17 @@
 <script lang="ts">
-	import { goto } from "$app/navigation";
+	import { SplashScreen } from '@capacitor/splash-screen';
+    import { goto } from "$app/navigation";
 	import { Doggo } from "$lib/assets/images";
 	import { delidock } from "$lib/utils/delidock.js";
 	import { onMount } from "svelte";
     
 	import { fly } from "svelte/transition";
 
-    onMount(()=> {
+    onMount( async ()=> {
         if (delidock.checkToken()) {
             goto('/home', {replaceState: true})
         }
+        await SplashScreen.hide();
     })
 
     export let data
