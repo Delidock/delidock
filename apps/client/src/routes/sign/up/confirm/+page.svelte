@@ -31,6 +31,7 @@
             goto("/sign/up", {replaceState: true})
             return
         }
+        
         const confirmResponse = await delidock.confrimPassword($registerUser, password, confirmedPass)
         switch (confirmResponse.status) {
             case 200:

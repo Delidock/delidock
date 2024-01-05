@@ -9,14 +9,14 @@
     onMount(()=>{
         if ($registerUser) {
             email = $registerUser.email
-            firstname = $registerUser.firstname
-            lastname = $registerUser.lastname
+            firstName = $registerUser.firstName
+            lastName = $registerUser.lastName
         }
     })
     
     let email : string
-    let firstname : string
-    let lastname: string
+    let firstName : string
+    let lastName: string
 
     let emailError : string | null
     
@@ -28,7 +28,7 @@
                 emailError = "Account already exists"
                 break;
             case 200:
-                $registerUser = {email, firstname, lastname}     
+                $registerUser = {email, firstName, lastName}     
                 goto('/sign/up/confirm', {replaceState : true}) 
                 break
             default:
@@ -42,8 +42,8 @@
         <h1 class="text-text_color text-2xl flex mb-4">Register</h1>
             <form on:submit|preventDefault={()=>handleRegister(email)} class="flex-col flex w-full gap-3" >
                 <div class="flex flex-col gap-3">
-                    <InputField icon={PersonIcon} label="Firstname" type="text" bind:value={firstname} error={null}/>
-                    <InputField icon={PersonIcon} label="Lastname" type="text" bind:value={lastname} error={null}/>
+                    <InputField icon={PersonIcon} label="Firstname" type="text" bind:value={firstName} error={null}/>
+                    <InputField icon={PersonIcon} label="Lastname" type="text" bind:value={lastName} error={null}/>
                     <InputField icon={EmailIcon} label="Email" type="email" bind:value={email} error={emailError} id="register"/>
                 </div>
                 <div class="w-1/2">

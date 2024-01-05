@@ -75,7 +75,12 @@
     const tryConnect = async () => {
         livekitState = LivekitState.VIEW
         
-        let token = await (await delidock.getLivekitToken($box.id, "mirek")).text()
+        let token = await delidock.getLivekitToken($box.id)
+        if (!token) {
+            livekitState = LivekitState.DISCONNECTED
+            return
+        }
+
         const livekitSignal = $box.livekitIP
 
         liveKit.connectionPrep(token, livekitSignal)
