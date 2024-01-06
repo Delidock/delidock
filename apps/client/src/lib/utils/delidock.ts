@@ -1,11 +1,20 @@
 import { goto } from "$app/navigation"
-import type { RegisterUser } from "$lib/types"
-import Cookies from "universal-cookie"
+import type { Box, RegisterUser } from "$lib/types"
+import Cookies, { type Cookie } from "universal-cookie"
+import { type Socket, io } from 'socket.io-client'
+import { socketListen, socketStop } from "./socket"
+import { socketStore } from "$lib/stores"
+import { PUBLIC_API_URL } from '$env/static/public';
+import { Update } from "./BoxUpdater"
 
-const api : string = "https://delidock-api.stepskop.xyz"
 class Delidock {
+    api : string = "https://delidock-api.stepskop.xyz"
+    livekitIp : string = "http://delidock-livekit.stepskop.xyz"
+    token : string = ""
+    cookies : Cookie = new Cookies()
+    socket: Socket | null = null
     login = async (email: string, password: string) => {
-        return await fetch(`${api}/sign/in`, {
+        const res = await fetch(`${this.api}/sign/in`, {
             method: "post",
             headers: {
             'Accept': 'application/json',
@@ -13,18 +22,28 @@ class Delidock {
             },
             body: JSON.stringify({email, password})
         })
+        if (res.status === 200) {
+            this.token = await res.text()
+            this.cookies.set("token", this.token, {
+                secure: true,
+                path: "/",
+                sameSite: "strict"
+            })
+            this.socketConnect()
+        }      
+        return res
     }
 
     logout = () => {
-        const cookies = new Cookies()
-        cookies.remove("token", {
+        this.token = ''
+        this.cookies.remove("token", {
             path: "/",
         })
         goto("/sign/in", {replaceState: true})
     }
 
     register = async (email: string) => {
-        return await fetch(`${api}/sign/up`, {
+        return await fetch(`${this.api}/sign/up`, {
         method: "post",
         body: JSON.stringify({email}),
         headers: {
@@ -36,7 +55,7 @@ class Delidock {
 
     getLivekitToken = async (id: string) => {
         try {
-            const token = await fetch(`${api}/box/${id}/livekit`, {
+            const token = await fetch(`${this.api}/box/${id}/livekit`, {
                 method: "GET",
                 headers: {
                     Authorization: "Bearer "+new Cookies().get('token')
@@ -57,7 +76,7 @@ class Delidock {
 
     confrimPassword = async (registerUser: RegisterUser, password: string, confirmedPass: string) => {
         const user = {...registerUser, password, confirmedPass}
-        return await fetch(`${api}/sign/up/confirm`, {
+        return await fetch(`${this.api}/sign/up/confirm`, {
             method: "post",
             headers: {
             'Accept': 'application/json',
@@ -67,19 +86,55 @@ class Delidock {
         })
     }
 
-    checkToken = () => {
-        console.log("Checking token");
+    checkToken = () => {   
+        console.log("checking token");
         
-        const isValid = true
-        if ((new Cookies().get('token')) && (isValid)) {
+        if ((this.cookies.get('token'))) {
+            this.token = this.cookies.get('token')
             return true
         } else
             return false
     }
 
-    socketConnection = () => {
+    socketConnect = () => {
+        console.log("connecting to socket");
         
+        if (this.token) {
+            const socket = io(this.api,{
+                auth: {
+                    token: this.token
+                }
+            })
+            if (socket) {
+                this.socket = socket
+                socketStore.set(socket)
+                socketListen(socket)
+            }
+        }
     }
-}
+    socketDisconnect = () => {
+        if (this.socket) {
+            socketStop(this.socket)
+        }
+        this.socket = null
+        socketStore.set(null)
+    }
 
+    unlock = (box: Box) =>{
+
+        //fetch open
+        Update(box, 'status', true)
+    }
+    
+    changePin = (box: Box) => {
+
+        //fetch change
+        Update(box, 'pin', "321458")
+    }
+    updateName(box: Box, boxName: string) {
+
+        //fetch name
+		Update(box, 'name', boxName)
+	}
+}
 export const delidock = new Delidock

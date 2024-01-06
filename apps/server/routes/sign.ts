@@ -61,8 +61,6 @@ signRouter.post("/up/confirm", async (req, res) => {
 })
 
 signRouter.post("/in", async (req, res) => {
-    console.log("LOGGING");
-    
     try {
         const user = await prisma.user.findUnique({
             where: {

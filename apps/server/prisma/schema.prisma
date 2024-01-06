@@ -26,7 +26,8 @@ model Box {
   id String @id @default(auto()) @map("_id") @db.ObjectId
   name String?
   activated Boolean
-  lastPIN Int?
+  lastPIN String?
+  lastStatus Boolean @default(false)
 }
 model Roles {
   id String @id @map("_id") @db.ObjectId

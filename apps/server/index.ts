@@ -7,9 +7,33 @@ import { startSocket } from './socket'
 
 const app = express()
 const httpServer = http.createServer(app)
-const io = new Server(httpServer, { cors: { origin: '*', credentials: true }})
+const io = new Server<
+ClientToServerEvents,
+ServerToClientEvents,
+InterServerEvents,
+SocketData
+>(httpServer, { cors: { origin: '*', credentials: true }})
 
 export let secret = "jP830iVZxa_9OPKOw4EvSsca4r6lpWNnjsRMwvsVAuM"
+
+interface ServerToClientEvents {
+    noArg: () => void;
+    basicEmit: (a: number, b: string, c: Buffer) => void;
+    withAck: (d: string, callback: (e: number) => void) => void;
+  }
+  
+  interface ClientToServerEvents {
+    hello: () => void;
+  }
+  
+  interface InterServerEvents {
+    ping: () => void;
+  }
+  
+  interface SocketData {
+    name: string;
+    age: number;
+  }
 
 app.set('port', 3000)
 

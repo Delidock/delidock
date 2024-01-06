@@ -21,16 +21,6 @@
         const response = await delidock.login(email, password)
         switch (response.status) {
             case 200:
-                const token = await response.text()
-                if (true) {
-                    const cookies = new Cookies()
-                    cookies.set("token", token, {
-                            secure: true,
-                            path: "/",
-                            sameSite: "strict"
-                        }
-                    )
-                }
                 formReset()
                 goto("/home", { replaceState: true})
                 break;

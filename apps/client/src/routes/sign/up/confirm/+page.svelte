@@ -4,6 +4,7 @@
 	import { Button, InputField } from '$lib/components'
 	import { registerUser } from "$lib/stores";
 	import { delidock } from "$lib/utils";
+	import { onMount } from "svelte";
 
     let confirmedPass: string
     let confirmError : string | null
@@ -12,7 +13,11 @@
     let password : string
 
     let greenConfirmed : boolean = false
-
+    onMount(()=> {
+        if (!$registerUser) {
+            goto('/sign/up', {replaceState: true})
+        }
+    })
     const checkPasswordMatch = () =>{
         if (!confirmedPass) {
             return
@@ -27,14 +32,17 @@
     }
 
     const handleConfirm = async () => {
+        confirmError = ""
         if (!$registerUser) {
             goto("/sign/up", {replaceState: true})
             return
         }
         
         const confirmResponse = await delidock.confrimPassword($registerUser, password, confirmedPass)
+        
         switch (confirmResponse.status) {
             case 200:
+                 $registerUser = null
                 goto("/sign/in", { replaceState: true})
                 break;
             case 401:
@@ -49,10 +57,9 @@
                 confirmError = "Something went wrong"
                 greenConfirmed = false
                 break;
-        }
-        
+        }      
     }
-    $: confirmedPass, checkPasswordMatch()
+    $: confirmedPass, password, checkPasswordMatch()
 </script>
 <section class="w-screen h-full flex flex-col">
     <div class="w-full h-full bg-background rounded-t-[2rem] px-6 pb-10 pt-8 flex flex-col items-center justify-start relative">

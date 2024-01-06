@@ -25,6 +25,7 @@
         const registerRespose = await delidock.register(email)
          switch (registerRespose.status) {
             case 409:
+                emailError = ""
                 emailError = "Account already exists"
                 break;
             case 200:

@@ -1,8 +1,9 @@
 <script lang="ts">
-    import { Box } from "$lib/types";
+    import { type Box } from "$lib/types";
     import { HideEyeIcon, ShowEyeIcon,  ThreeDotIcon, UnlockIcon, ResetIcon } from "$lib/assets/icons";
 
-    export let box : Box
+    export let pin : string
+    export let copyText : boolean
 
     const copy = () => {        
         navigator.clipboard.writeText(splittedPin)
@@ -12,14 +13,14 @@
         }, 500);   
     }
 
-    let splittedPin : string = $box.pin.slice(0, ($box.pin.length/2)) + " " + box.pin.slice(($box.pin.length/2))
+    let splittedPin : string = pin.slice(0, (pin.length/2)) + " " + pin.slice((pin.length/2))
 
     let hiddenCode : boolean = true
-    export let copyText : boolean
+    
 
     $: {
-        splittedPin = $box.pin.slice(0, ($box.pin.length/2)) + " " + $box.pin.slice(($box.pin.length/2))
-        hiddenCode
+        splittedPin = pin.slice(0, (pin.length/2)) + " " + pin.slice((pin.length/2))
+        //hiddenCode
     }
 </script>
 <div class="border-btn_secondary h-full rounded-lg border-[1px] flex justify-center items-center relative text-text_color ">

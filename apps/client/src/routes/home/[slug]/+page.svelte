@@ -1,19 +1,20 @@
 <script lang="ts">
     import { goto } from '$app/navigation';
-    import { GlobeIcon, GearIcon, LeftArrowIcon, EditPenIcon, CheckmarkIcon, CameraIcon, BoxIcon, CrossIcon, ResetIcon, UnlockIcon, BigCrossIcon } from '$lib/assets/icons'
+    import { GlobeIcon, GearIcon, EditPenIcon, CheckmarkIcon, CameraIcon, BoxIcon, CrossIcon, ResetIcon, UnlockIcon, BigCrossIcon } from '$lib/assets/icons'
 	import { StatusWidget, BoxButton, PinBox} from '$lib/components';
-    import { Box, LivekitState } from '$lib/types';
+    import { type Box, LivekitState } from '$lib/types';
 
 	import { tick } from 'svelte';
 	import { delidock } from '$lib/utils/delidock.js';
 
-    import { Participant, RemoteParticipant, Room, RoomEvent, Track, type RoomOptions } from 'livekit-client';
+    import { type Participant, RemoteParticipant, Room, RoomEvent, Track, type RoomOptions } from 'livekit-client';
+	import { boxes } from '$lib/stores/index.js';
 
     export let data
+    
+    let box : Box = $boxes[data.boxId]
 
-    const box : Box = new Box(data.box.name, data.box.id, data.box.pin, data.box.livekitToken, data.box.livekitServer, data.box.opened)
-
-    let boxName : string = $box.name
+    let boxName : string = box.name
     let nameInput : HTMLInputElement
     let inputDisabled : boolean = true
     let nameError = false
@@ -37,7 +38,7 @@
         if (!inputDisabled) {
             if (boxName.length >= 3){
                 inputDisabled = true
-                box.updateName(boxName)
+                delidock.updateName(box,boxName)
             } else {
 
                 nameError = true
@@ -51,6 +52,8 @@
     }
 
     $: {
+        box = $boxes[data.boxId]
+        
         if (boxName.length < 3) {
             errorUnderline = true
         } else {
@@ -62,9 +65,7 @@
 
     const changePIN = () => {
         copyText = false
-        box.changePIN()
-        console.log($box);
-        
+        delidock.changePin(box)
     }
 
     //LIVEKIT
@@ -75,13 +76,13 @@
     const tryConnect = async () => {
         livekitState = LivekitState.VIEW
         
-        let token = await delidock.getLivekitToken($box.id)
+        let token = await delidock.getLivekitToken(box.id)
         if (!token) {
             livekitState = LivekitState.DISCONNECTED
             return
         }
 
-        const livekitSignal = $box.livekitIP
+        const livekitSignal = delidock.livekitIp
 
         liveKit.connectionPrep(token, livekitSignal)
     }
@@ -147,7 +148,7 @@
         renderParticipant(participant, true)
     }
     const renderParticipant = (participant: Participant, remove: boolean = false) => {
-        if ((!remove && participant instanceof RemoteParticipant) && participant.identity === `box:${$box.id}`) {
+        if ((!remove && participant instanceof RemoteParticipant) && participant.identity === `box:${box.id}`) {
 
             livekitState = LivekitState.BOXCONNECTED
             const cameraPub = participant.getTrack(Track.Source.Camera)
@@ -168,7 +169,6 @@
             livekitState = LivekitState.CONNECTED
         }
     }
-    
 </script>
 <div class="w-full min-h-screen bg-background pt-4 flex flex-col gap-4">
     <div class="flex flex-row items-center justify-between px-4 h-8">
@@ -191,7 +191,7 @@
 
     <section class="w-full min-h-[calc(100svh-4rem)] bg-secondary rounded-t-[2rem] flex flex-col gap-2 px-4 pt-4">
         <div class="w-full justify-end flex">
-            <StatusWidget open={$box.status} />
+            <StatusWidget open={box.status} />
         </div>
 
         <div class="transition-all ease-in-out text-text_color w-full aspect-[4/3] rounded-lg border border-outline justify-center items-center flex flex-row relative overflow-hidden" class:video-inactive={(livekitState === LivekitState.DISCONNECTED)} class:video-gradient={(livekitState > LivekitState.DISCONNECTED)} >
@@ -227,15 +227,15 @@
 
         <div class="w-full h-48 flex flex-col gap-2">
             <div class="h-1/2">
-                <PinBox box={$box} copyText={copyText}/>
+                {#key box}
+                    <PinBox pin={box.pin} copyText={copyText}/>
+                {/key}
             </div>
             <div class="w-full flex flex-row gap-1 h-1/3">
-                <BoxButton label="Unlock" icon={UnlockIcon} on:click={()=>box.unlock()}/>
+                <BoxButton label="Unlock" icon={UnlockIcon} on:click={()=>delidock.unlock(box)}/>
                 <BoxButton label="Change PIN" icon={ResetIcon} on:click={()=>changePIN()}/>
             </div>
         </div>
-
-        
     </section>
 </div>
 <style>

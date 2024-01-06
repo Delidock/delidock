@@ -7,7 +7,7 @@
     import { delidock } from "$lib/utils";
 	import { onMount } from "svelte";
 	import { goto } from "$app/navigation";
-	import { page } from "$app/stores";
+	import { boxes } from "$lib/stores";
     
     let date = new Date()
     let today : string = `${date.toLocaleDateString('en-US', {weekday: 'long'})} ${date.toLocaleString('en-US',{month: 'long'})} ${date.getDate()}`
@@ -59,9 +59,9 @@
         </div>
         <div class="flex flex-col gap-1">
             <section class="flex flex-col gap-2 items-start">
-                {#if $page.data.boxes}
-                    {#each $page.data.boxes as box}
-                        <BoxWidget boxData={box} on:click={()=>goto(`/home/${box.id}`)}/>
+                {#if $boxes}
+                    {#each $boxes as box}
+                        <BoxWidget box={box} on:click={()=>goto(`/home/${box.id}`)}/>
                     {/each}
                 {/if}
             </section>

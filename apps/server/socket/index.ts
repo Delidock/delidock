@@ -1,7 +1,13 @@
 import { instrument } from "@socket.io/admin-ui";
 import { Server, Socket } from "socket.io";
+import jwt, { JsonWebTokenError } from "jsonwebtoken";
+import { secret } from "..";
+import { PrismaClient } from "@prisma/client";
+
+
 
 export const startSocket = (io : Server) => {
+    const prisma = new PrismaClient()
     instrument(io, {
         auth: {
             type: "basic",
@@ -20,56 +26,57 @@ export const startSocket = (io : Server) => {
         .random() * (maxm - minm + 1)) + minm;
     }
 
-    io.on("connection", (socket : Socket)=>{
-
-        socket.join(socket.handshake.auth.room)  
-        io.to(socket.handshake.auth.room).emit("joinedAck")  
-
-        io.sockets.emit("default", messages)
-        io.to(socket.handshake.auth.room).emit("logs", roomMessages)
-
-        socket.on("message", (args: string)=> {
-            messages.push({id: socket.id, content: args})
-            if (messages.length > 20) {
-                messages.shift()
+    io.on("connection", async (socket : Socket)=>{
+        try {
+            if (!jwt.verify(socket.handshake.auth.token, secret)   ) {
+                socket.disconnect()    
             }
-            io.sockets.emit("default", messages)
-        })    
-        const logs = (a: string) =>{
-            roomMessages.push({id: socket.id, content: a, time: new Date().toLocaleTimeString()})
-            if (roomMessages.length > 4) {
-                roomMessages.shift()
-            }
-            io.to(socket.handshake.auth.room).emit("logs", roomMessages)
+            const userPayload = jwt.decode(socket.handshake.auth.token, { json: true})
+            if (userPayload) {
+                try {
+                    const user = await prisma.user.findUnique({
+                        where:{
+                            id: userPayload._id
+                        }
+                    })
+                    if (user && user.role === '000000000000000000000001') {
+                        const allowedBoxesIds = user?.allowedBoxes
+                        const managedBoxesIds = user?.managedBoxes
 
+                        const allowedBoxes = await prisma.box.findMany({where:{
+                            id: {in: allowedBoxesIds}
+                        }})
+
+                        const managedBoxes = await prisma.box.findMany({where: {
+                            id: {in: managedBoxesIds}
+                        }})
+
+                        for (const allowedBox of allowedBoxes) {
+                            socket.join(`box:allowed:${allowedBox.id}`)
+                            socket.emit('boxAdd', {id: allowedBox.id, name: allowedBox.name, status: allowedBox.lastStatus, pin: allowedBox.lastPIN, managed: false})
+                            
+                        }
+                        for (const managedBox of managedBoxes) {
+                            socket.join(`box:managed:${managedBox.id}`)
+                            socket.emit('boxAdd', {id: managedBox.id, name: managedBox.name, status: managedBox.lastStatus, pin: managedBox.lastPIN, managed: true})
+                        }
+
+                    } else {
+                        socket.disconnect()  
+                    }
+                } catch (error) {
+                    console.log(error);
+                    
+                    socket.disconnect()  
+                }  
+            }else {
+                socket.disconnect()  
+            }
+            
+            
+        } catch (error) {
+            socket.disconnect()     
         }
-
-        socket.on("checkOpen", ()=> {        
-            io.to(socket.handshake.auth.room).emit("checkOpen")
-        })
-        socket.on("checkedOpen", (args: string)=>{
-            io.to(socket.handshake.auth.room).emit("checkedOpen", args)
-        })
-
-        socket.on("openBox", ()=>{         
-            io.to(socket.handshake.auth.room).emit("openBox")
-            logs("Trying to open")
-        })
-
-        socket.on("openedBox", ()=>{
-            io.to(socket.handshake.auth.room).emit("openedBox", roomMessages)
-            logs("Opened")
-        })
-
-        socket.on("changePIN", () => {
-            let pin : number = generateRandomNumber()
-            io.to(socket.handshake.auth.room).emit("changePIN", pin)
-            logs("Trying to change PIN to "+pin)
-        })
-
-        socket.on("changedPIN", (args : string) => {
-            io.to(socket.handshake.auth.room).emit("changedPIN", args)
-            logs("Changed PIN to "+args)
-        })
+        
     })
 }
