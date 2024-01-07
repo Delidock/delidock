@@ -9,8 +9,8 @@
     let confirmedPass: string
     let confirmError : string | null
 
-    let passwordError : string | null
     let password : string
+    let passwordError : string | null
 
     let greenConfirmed : boolean = false
     onMount(()=> {
@@ -42,7 +42,7 @@
         
         switch (confirmResponse.status) {
             case 200:
-                 $registerUser = null
+                $registerUser = null
                 goto("/sign/in", { replaceState: true})
                 break;
             case 401:
@@ -50,6 +50,7 @@
                 greenConfirmed = false
                 break
             case 409:
+                $registerUser = null
                 confirmError = "Account is already registered"
                 greenConfirmed = false
                 break

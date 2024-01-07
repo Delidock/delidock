@@ -2,7 +2,7 @@
     import { goto } from '$app/navigation';
     import { GlobeIcon, GearIcon, EditPenIcon, CheckmarkIcon, CameraIcon, BoxIcon, CrossIcon, ResetIcon, UnlockIcon, BigCrossIcon } from '$lib/assets/icons'
 	import { StatusWidget, BoxButton, PinBox} from '$lib/components';
-    import { type Box, LivekitState } from '@delidock/types';
+    import { LivekitState, type BoxClient } from '@delidock/types';
 
 	import { tick } from 'svelte';
 	import { delidock } from '$lib/utils/delidock.js';
@@ -12,7 +12,7 @@
 
     export let data
     
-    let box : Box = $boxes[data.boxId]
+    let box : BoxClient = $boxes[data.boxId]
 
     let boxName : string = box.name
     let nameInput : HTMLInputElement
@@ -43,7 +43,6 @@
             if (boxName.length >= 3 && (await delidock.updateName(box,boxName)).status === 200){
                 inputDisabled = true
             } else {
-
                 nameError = true
                 nameInput.focus()
                 setTimeout(()=>{
@@ -65,6 +64,7 @@
     }
     
     let copyText = false
+
 
     const changePIN = () => {
         copyText = false
@@ -178,27 +178,28 @@
         <button on:click|preventDefault={()=>goto("/home")} class=" active:scale-90 transition-transform ease-in-out"><BigCrossIcon/></button>
         <div class="flex flex-row gap-2" class:invalid={nameError} >
             <input class:text-red={errorUnderline}  spellcheck="false" maxlength="20" on:keydown={(e) => e.key === 'Enter' && updateBoxName()} class=" text-center outline-none text-text_color bg-transparent" disabled='{inputDisabled}' type="text" style="width: {boxName.length}ch" bind:this={nameInput} bind:value={boxName} >
-            {#if inputDisabled}
-                <button class="active:scale-90 transition-transform ease-in-out scale-95" on:click={()=>editName()}>
-                    <EditPenIcon/>
-                </button>
-                
-                {:else}
-                <button class="active:scale-90 transition-transform ease-in-out scale-95" on:click={()=>updateBoxName()}>
-                    <CheckmarkIcon/>
-                </button>
-                <button class="active:scale-90 transition-transform ease-in-out scale-95" on:click={()=>cancelEditName()}>
-                    <CrossIcon/>
-                </button>
+            {#if box.managed}
+                {#if inputDisabled}
+                    <button class="active:scale-90 transition-transform ease-in-out scale-95" on:click={()=>editName()}>
+                        <EditPenIcon/>
+                    </button>
+                    
+                    {:else}
+                    <button class="active:scale-90 transition-transform ease-in-out scale-95" on:click={()=>updateBoxName()}>
+                        <CheckmarkIcon/>
+                    </button>
+                    <button class="active:scale-90 transition-transform ease-in-out scale-95" on:click={()=>cancelEditName()}>
+                        <CrossIcon/>
+                    </button>
+                {/if}
             {/if}
-
         </div>
         <button class="active:scale-90 transition-transform ease-in-out"><GearIcon/></button>
     </div>
 
     <section class="w-full min-h-[calc(100svh-4rem)] bg-secondary rounded-t-[2rem] flex flex-col gap-2 px-4 pt-4">
         <div class="w-full justify-end flex">
-            <StatusWidget open={box.status} />
+            <StatusWidget open={box.lastStatus} />
         </div>
 
         <div class="transition-all ease-in-out text-text_color w-full aspect-[4/3] rounded-lg border border-outline justify-center items-center flex flex-row relative overflow-hidden" class:video-inactive={(livekitState === LivekitState.DISCONNECTED)} class:video-gradient={(livekitState > LivekitState.DISCONNECTED)} >
@@ -234,9 +235,7 @@
 
         <div class="w-full h-48 flex flex-col gap-2">
             <div class="h-1/2">
-                {#key box}
-                    <PinBox pin={box.pin} copyText={copyText}/>
-                {/key}
+                <PinBox pin={box.lastPIN} copyText={copyText}/>
             </div>
             <div class="w-full flex flex-row gap-1 h-1/3">
                 <BoxButton label="Unlock" icon={UnlockIcon} on:click={()=>delidock.unlock(box)}/>

@@ -1,6 +1,6 @@
 import { goto } from "$app/navigation";
 import { boxes } from "$lib/stores";
-import type { Box } from "@delidock/types";
+import type { BoxClient } from "@delidock/types";
 import type { Socket } from "socket.io-client";
 import { get } from "svelte/store";
 import Cookies from "universal-cookie";
@@ -23,21 +23,23 @@ export const socketListen = (socket: Socket) => {
         }
     })
 
-    socket.on('boxAdd', (box: Box) => {
-        if (!get(boxes).some((b:Box) => b.id === box.id)) {
-            boxes.update((b: Box[]) => [...b, box])
+    socket.on('boxAdd', (box: BoxClient) => {
+        if (!get(boxes).some((b:BoxClient) => b.id === box.id)) {
+            boxes.update((b: BoxClient[]) => [...b, box])
         }
     })
 
     socket.on('boxUnlocked', (id:string) => {
-        const boxIndex = get(boxes).findIndex((b:Box) => b.id === id) 
+        const boxIndex = get(boxes).findIndex((b:BoxClient) => b.id === id) 
         if (boxIndex >= 0) {
-            Update(get(boxes)[boxIndex], 'status', true)
+            
+            
+            Update(get(boxes)[boxIndex], 'lastStatus', true)
         }
     })
 
     socket.on('boxNameChanged', (id:string, name: string) => {
-        const boxIndex = get(boxes).findIndex((b:Box) => b.id === id) 
+        const boxIndex = get(boxes).findIndex((b:BoxClient) => b.id === id) 
         if (boxIndex >= 0) {
             Update(get(boxes)[boxIndex], 'name', name)
         }

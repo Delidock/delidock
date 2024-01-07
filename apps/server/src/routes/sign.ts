@@ -1,17 +1,17 @@
 import express from "express";
 import jwt from 'jsonwebtoken'
-import { prisma, secret } from '..';
+import { prisma } from '../index';
 import bcrypt from 'bcrypt'
-
-
+import { LoginRequestBody, RegisterConfirmRequestBody, RegisterRequestBody, User, UserJwtPayload } from "@delidock/types";
 
 export const signRouter = express.Router()
 
 signRouter.post("/up", async (req, res) => {
+    const body : RegisterRequestBody = req.body
     try {
         const user = await prisma.user.findUnique({
             where: {
-                email: req.body.email
+                email: body.email
             }
         })
         if (user) {
@@ -25,20 +25,21 @@ signRouter.post("/up", async (req, res) => {
 })
 
 signRouter.post("/up/confirm", async (req, res) => {
+    const body : RegisterConfirmRequestBody = req.body
     try {
         const foundUser = await prisma.user.findUnique({
             where: {
-                email: req.body.email
+                email: body.email
             }
         })
-        if (!foundUser && req.body.password === req.body.confirmedPass) {
+        if (!foundUser && body.password === body.confirmedPass) {
             try {
                 const newUser = await prisma.user.create({
                     data: {
-                        firstName: req.body.firstName,
-                        lastName: req.body.lastName,
-                        email: req.body.email,
-                        passwordHash: bcrypt.hashSync(req.body.password, 10),
+                        firstName: body.firstName,
+                        lastName: body.lastName,
+                        email: body.email,
+                        passwordHash: bcrypt.hashSync(body.password, 10),
                         managedBoxes: [],
                         allowedBoxes: []
                     }
@@ -61,14 +62,24 @@ signRouter.post("/up/confirm", async (req, res) => {
 })
 
 signRouter.post("/in", async (req, res) => {
+    const body : LoginRequestBody = req.body
     try {
-        const user = await prisma.user.findUnique({
+        const user : User | null = await prisma.user.findUnique({
             where: {
-                email: req.body.email
+                email: body.email
             }
         })
-        if (user && (bcrypt.compareSync(req.body.password, user.passwordHash)))
-            res.status(200).send(jwt.sign({_id: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName}, secret))
+        if (!user) {
+            res.send().status(401)
+            return
+        }
+        if (user && (bcrypt.compareSync(req.body.password, user.passwordHash))) {
+            const jwtPayload : UserJwtPayload = {id: user.id, role: user.role ,email: user.email, firstName: user.firstName, lastName: user.lastName}
+            if (process.env.DELIDOCK_API_SECRET) {
+                res.status(200).send(jwt.sign(jwtPayload, process.env.DELIDOCK_API_SECRET ))
+            }
+            
+        }
         res.status(401).send()
     } catch (error) {
         console.log(error);

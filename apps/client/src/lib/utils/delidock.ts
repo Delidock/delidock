@@ -1,27 +1,28 @@
 import { goto } from "$app/navigation"
-import type { Box, RegisterUser } from "@delidock/types"
+import type { Box, BoxClient, LoginRequestBody, RegisterConfirmRequestBody, RegisterRequestBody, RegisterUser } from "@delidock/types"
 import { Preferences } from '@capacitor/preferences';
 import Cookies, { type Cookie } from "universal-cookie"
 import { type Socket, io } from 'socket.io-client'
 import { socketListen, socketStop } from "./socket"
-import { socketStore } from "$lib/stores"
-import { PUBLIC_API_URL } from '$env/static/public';
+import { boxes, socketStore } from "$lib/stores"
+import { PUBLIC_API_URL, PUBLIC_LIVEKIT_URL } from '$env/static/public';
 import { Update } from "./BoxUpdater"
 
 class Delidock {
     api : string = PUBLIC_API_URL ?? "https://delidock-api.stepskop.xyz"
-    livekitIp : string = "https://delidock-livekit.stepskop.xyz"
+    livekitIp : string = PUBLIC_LIVEKIT_URL ?? "https://delidock-livekit.stepskop.xyz"
     token : string = ""
     cookies : Cookie = new Cookies()
     socket: Socket | null = null
     login = async (email: string, password: string, remember: boolean) => {
+        const body : LoginRequestBody = { email, password }
         const res = await fetch(`${this.api}/sign/in`, {
             method: "post",
             headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/json'
             },
-            body: JSON.stringify({email, password})
+            body: JSON.stringify(body)
         })
         if (res.status === 200) {
             this.token = await res.text()
@@ -52,13 +53,15 @@ class Delidock {
         if (this.socket) {
             socketStop(this.socket)
         }
+        boxes.set([])
         goto("/sign/in", {replaceState: true})
     }
 
     register = async (email: string) => {
+        const body : RegisterRequestBody = {email}
         return await fetch(`${this.api}/sign/up`, {
         method: "post",
-        body: JSON.stringify({email}),
+        body: JSON.stringify(body),
         headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json'
@@ -88,14 +91,14 @@ class Delidock {
     }
 
     confrimPassword = async (registerUser: RegisterUser, password: string, confirmedPass: string) => {
-        const user = {...registerUser, password, confirmedPass}
+        const body : RegisterConfirmRequestBody = {...registerUser, password, confirmedPass}
         return await fetch(`${this.api}/sign/up/confirm`, {
             method: "post",
             headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/json'
             },
-            body: JSON.stringify(user)
+            body: JSON.stringify(body)
         })
     }
 
@@ -123,7 +126,7 @@ class Delidock {
 
     socketConnect = () => {        
         if (this.token) {
-            const socket = io(this.api,{
+            const socket = io(`${this.api}/ws/users`,{
                 auth: {
                     token: this.token
                 }
@@ -146,22 +149,22 @@ class Delidock {
     unlock = (box: Box) =>{
         fetch(`${this.api}/box/${box.id}/unlock`, {
             headers: {
-                Authorization: "Bearer "+new Cookies().get('token')
+                Authorization: "Bearer "+this.cookies.get('token')
             }
         })
     }
     
-    changePin = (box: Box) => {
+    changePin = (box: BoxClient) => {
 
         //fetch change
-        Update(box, 'pin', "321458")
+        Update(box, 'lastPIN', "321458")
     }
     updateName = async (box: Box, boxName: string) => {
         return await fetch(`${this.api}/box/${box.id}/name`, {
             headers: {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json',
-                Authorization: "Bearer "+new Cookies().get('token')
+                Authorization: "Bearer "+this.cookies.get('token')
             },
             method: 'put',
             body: JSON.stringify({name: boxName})

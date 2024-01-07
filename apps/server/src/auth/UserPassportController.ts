@@ -1,3 +1,4 @@
+import { User, UserJwtPayload } from '@delidock/types'
 import { PrismaClient } from '@prisma/client'
 import { PassportStatic } from 'passport'
 import { ExtractJwt, Strategy, StrategyOptions } from 'passport-jwt'
@@ -5,12 +6,12 @@ const prisma = new PrismaClient()
 export const userPassportController = (passport: PassportStatic) => {
     let options : StrategyOptions = {
         jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-        secretOrKey: "jP830iVZxa_9OPKOw4EvSsca4r6lpWNnjsRMwvsVAuM",
+        secretOrKey: process.env.DELIDOCK_API_SECRET,
     }
     
-    passport.use(new Strategy(options, async function(jwt_payload, done) {
+    passport.use(new Strategy(options, async function(jwt_payload : UserJwtPayload, done) {
         try {
-            const user = await prisma.user.findUnique({
+            const user : User | null = await prisma.user.findUnique({
                 where: {
                     email: jwt_payload.email
                 }

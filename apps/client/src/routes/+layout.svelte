@@ -7,9 +7,7 @@
 	import { socketStore } from "$lib/stores";
     
     
-    onMount(async ()=> {
-        console.log(await delidock.checkToken());
-        
+    onMount(async ()=> {        
         if (await delidock.checkToken()) {
             if (!$socketStore) {
                 delidock.socketConnect()

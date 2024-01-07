@@ -4,6 +4,7 @@ import{ Server } from 'socket.io'
 import cors from 'cors'
 import bodyParser from 'body-parser'
 import { socketServer } from './socket'
+import 'dotenv/config'
 
 import { statusRouter } from "./routes/status";
 import { boxRouter } from './routes/box'
@@ -20,8 +21,6 @@ export const io : Server = new Server<ClientToServerEvents,ServerToClientEvents,
     credentials: true 
   }
 })
-
-export let secret = "jP830iVZxa_9OPKOw4EvSsca4r6lpWNnjsRMwvsVAuM"
 export const prisma = new PrismaClient()
 interface ServerToClientEvents {
     noArg: () => void;
@@ -42,7 +41,7 @@ interface ServerToClientEvents {
     age: number;
   }
 
-app.set('port', 3000)
+app.set('port', process.env.DELIDOCK_API_PORT)
 
 app.use(bodyParser.json())
 app.use(cors())
@@ -59,7 +58,11 @@ app.use('/box', boxRouter)
 
 app.use('/status', statusRouter)
 
-httpServer.listen(app.get('port'), () => {
+if (process.env.DELIDOCK_API_SECRET) {
+  httpServer.listen(app.get('port') ?? 3000, () => {
     socketServer.startSocket(io)
-    console.log("Starting the API on 3000");
-})
+    console.log("Starting the API on "+process.env.DELIDOCK_API_PORT ?? 3000);
+  })
+} else
+  console.log("Please provide secret");
+  

@@ -16,10 +16,8 @@
 
     let hiddenCode : boolean = true
     
-
     $: {
         splittedPin = pin.slice(0, (pin.length/2)) + " " + pin.slice((pin.length/2))
-        //hiddenCode
     }
 </script>
 <div class="border-btn_secondary h-full rounded-lg border-[1px] flex justify-center items-center relative text-text_color ">

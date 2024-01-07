@@ -1,9 +1,8 @@
 import { instrument } from "@socket.io/admin-ui";
 import { Server, Socket } from "socket.io";
 import jwt from "jsonwebtoken";
-import { secret } from "..";
 import { PrismaClient } from "@prisma/client";
-
+import { BoxClient, RoleId, UserJwtPayload } from "@delidock/types"
 class SocketServer{
     io : Server | null = null
     socket : Socket | null = null
@@ -30,21 +29,21 @@ class SocketServer{
             return Math.floor(Math
             .random() * (maxm - minm + 1)) + minm;
         }
-        io.on("connection", async (socket : Socket)=>{
+        io.of("/ws/users").on("connection", async (socket : Socket)=>{
             this.socket = socket
             try {
-                if (!jwt.verify(socket.handshake.auth.token, secret)   ) {
+                if (!jwt.verify(socket.handshake.auth.token, process.env.DELIDOCK_API_SECRET ?? "")   ) {
                     socket.disconnect()    
                 }
-                const userPayload = jwt.decode(socket.handshake.auth.token, { json: true})
-                if (userPayload) {
+                const userPayload = jwt.decode(socket.handshake.auth.token, { json: true}) as UserJwtPayload | null
+                if (userPayload && (userPayload.role === RoleId.User)) {
                     try {
                         const user = await prisma.user.findUnique({
                             where:{
-                                id: userPayload._id
+                                id: userPayload.id
                             }
                         })
-                        if (user && user.role === '000000000000000000000001') {
+                        if (user && user.role === RoleId.User) {
                             const allowedBoxesIds = user?.allowedBoxes
                             const managedBoxesIds = user?.managedBoxes
     
@@ -57,13 +56,30 @@ class SocketServer{
                             }})
     
                             for (const allowedBox of allowedBoxes) {
-                                socket.join(`box:allowed:${allowedBox.id}`)
-                                socket.emit('boxAdd', {id: allowedBox.id, name: allowedBox.name, status: allowedBox.lastStatus, pin: allowedBox.lastPIN, managed: false})
-                                
+                                if (allowedBox.activated && allowedBox.lastPIN){
+                                    const box : BoxClient = {
+                                        id: allowedBox.id,
+                                        lastPIN: allowedBox.lastPIN,
+                                        name: allowedBox.name,
+                                        lastStatus: allowedBox.lastStatus,
+                                        managed: false
+                                    }
+                                    socket.join(`box:allowed:${allowedBox.id}`)
+                                    socket.emit('boxAdd', box)
+                                }
                             }
                             for (const managedBox of managedBoxes) {
-                                socket.join(`box:managed:${managedBox.id}`)
-                                socket.emit('boxAdd', {id: managedBox.id, name: managedBox.name, status: managedBox.lastStatus, pin: managedBox.lastPIN, managed: true})
+                                if (managedBox.activated && managedBox.lastPIN){
+                                    const box : BoxClient = {
+                                        id: managedBox.id,
+                                        lastPIN: managedBox.lastPIN,
+                                        name: managedBox.name,
+                                        lastStatus: managedBox.lastStatus,
+                                        managed: true
+                                    }
+                                    socket.join(`box:managed:${managedBox.id}`)
+                                    socket.emit('boxAdd', box)
+                                }
                             }
     
                         } else {
