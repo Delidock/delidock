@@ -2,7 +2,7 @@
     import { goto } from '$app/navigation';
     import { GlobeIcon, GearIcon, EditPenIcon, CheckmarkIcon, CameraIcon, BoxIcon, CrossIcon, ResetIcon, UnlockIcon, BigCrossIcon } from '$lib/assets/icons'
 	import { StatusWidget, BoxButton, PinBox} from '$lib/components';
-    import { type Box, LivekitState } from '$lib/types';
+    import { type Box, LivekitState } from '@delidock/types';
 
 	import { tick } from 'svelte';
 	import { delidock } from '$lib/utils/delidock.js';

@@ -1,5 +1,5 @@
 import { goto } from "$app/navigation"
-import type { Box, RegisterUser } from "$lib/types"
+import type { Box, RegisterUser } from "@delidock/types"
 import { Preferences } from '@capacitor/preferences';
 import Cookies, { type Cookie } from "universal-cookie"
 import { type Socket, io } from 'socket.io-client'

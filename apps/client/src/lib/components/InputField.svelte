@@ -1,10 +1,11 @@
 <script lang="ts">
     import { EmailIcon } from "$lib/assets/icons";
+	import type { ComponentType } from "svelte";
     export let label : string = "Input"
     export let value : string | FormDataEntryValue
     export let type = "text"
     export let error : string | null
-    export let icon : any = EmailIcon
+    export let icon : ComponentType = EmailIcon
     export let green : boolean = false
     export let id : string = ""
 

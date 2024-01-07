@@ -1,6 +1,7 @@
 <script lang="ts">
+	import type { ComponentType } from "svelte";
     export let label : string | null = null
-    export let icon : any | null = null
+    export let icon : ComponentType | null = null
 </script>
 <button on:click class="h-full w-full bg-btn_secondary rounded-lg flex flex-col justify-center items-center unsolid-shadow active:bg-btn_pressed active:scale-95 transition-all ease-in-out">
     <div class="flex flex-col justify-center items-center h-2/4">

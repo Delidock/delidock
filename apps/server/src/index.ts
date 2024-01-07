@@ -14,12 +14,12 @@ import { PrismaClient } from '@prisma/client'
 
 const app = express()
 const httpServer = http.createServer(app)
-export const io : Server = new Server<
-ClientToServerEvents,
-ServerToClientEvents,
-InterServerEvents,
-SocketData
->(httpServer, { cors: { origin: '*', credentials: true }})
+export const io : Server = new Server<ClientToServerEvents,ServerToClientEvents,InterServerEvents,SocketData>(httpServer, {
+   cors: { 
+    origin: '*', 
+    credentials: true 
+  }
+})
 
 export let secret = "jP830iVZxa_9OPKOw4EvSsca4r6lpWNnjsRMwvsVAuM"
 export const prisma = new PrismaClient()

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { ThreeDotIcon, UnlockIcon, ResetIcon } from "$lib/assets/icons";
     import { BoxButton, StatusWidget } from '$lib/components'
-	import { type Box } from "$lib/types";
+	import type { Box } from "@delidock/types";
 	import { delidock } from "$lib/utils";
 	import PinBox from "./PINBox.svelte";
 

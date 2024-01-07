@@ -1,4 +1,4 @@
-import type { Box, RegisterUser } from "$lib/types";
+import type { Box, RegisterUser } from "@delidock/types";
 import type { Socket } from "socket.io-client";
 import { writable, type Writable } from "svelte/store";
 

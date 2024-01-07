@@ -1,6 +1,5 @@
 <script lang="ts">
-    import { type Box } from "$lib/types";
-    import { HideEyeIcon, ShowEyeIcon,  ThreeDotIcon, UnlockIcon, ResetIcon } from "$lib/assets/icons";
+    import { HideEyeIcon, ShowEyeIcon } from "$lib/assets/icons";
 
     export let pin : string
     export let copyText : boolean

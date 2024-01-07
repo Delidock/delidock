@@ -1,6 +1,6 @@
 import { goto } from "$app/navigation";
 import { boxes } from "$lib/stores";
-import type { Box } from "$lib/types";
+import type { Box } from "@delidock/types";
 import type { Socket } from "socket.io-client";
 import { get } from "svelte/store";
 import Cookies from "universal-cookie";
