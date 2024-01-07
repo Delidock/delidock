@@ -2,8 +2,15 @@
     import { goto } from '$app/navigation';
     import { GlobeIcon, GearIcon, EditPenIcon, CheckmarkIcon, CameraIcon, BoxIcon, CrossIcon, ResetIcon, UnlockIcon, BigCrossIcon } from '$lib/assets/icons'
 	import { StatusWidget, BoxButton, PinBox} from '$lib/components';
-    import { LivekitState, type BoxClient } from '@delidock/types';
+    import type { BoxClient } from '@delidock/types';
 
+    enum LivekitState {
+        DISCONNECTED = 0,
+        VIEW = 1,
+        CONNECTED = 2,
+        BOXCONNECTED = 3,
+        BOXVIDEO = 4,
+    }
 	import { tick } from 'svelte';
 	import { delidock } from '$lib/utils/delidock.js';
 

@@ -1,7 +1,8 @@
 {
     "name": "@delidock/types",
     "main": "build/index.js",
-    "types": "src/index.ts",
+    "types": "build/index.d.ts",
+    "module": "build/index.js",
     "scripts": {
         "build": "tsc"
     },
