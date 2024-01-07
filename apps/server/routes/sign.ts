@@ -1,9 +1,9 @@
 import express from "express";
 import jwt from 'jsonwebtoken'
-import { secret } from '..';
-import { PrismaClient } from "@prisma/client";
+import { prisma, secret } from '..';
+import bcrypt from 'bcrypt'
 
-const prisma = new PrismaClient()
+
 
 export const signRouter = express.Router()
 
@@ -38,7 +38,7 @@ signRouter.post("/up/confirm", async (req, res) => {
                         firstName: req.body.firstName,
                         lastName: req.body.lastName,
                         email: req.body.email,
-                        passwordHash: req.body.password,
+                        passwordHash: bcrypt.hashSync(req.body.password, 10),
                         managedBoxes: [],
                         allowedBoxes: []
                     }
@@ -67,7 +67,7 @@ signRouter.post("/in", async (req, res) => {
                 email: req.body.email
             }
         })
-        if (user && (user.passwordHash === req.body.password))
+        if (user && (bcrypt.compareSync(req.body.password, user.passwordHash)))
             res.status(200).send(jwt.sign({_id: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName}, secret))
         res.status(401).send()
     } catch (error) {

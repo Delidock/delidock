@@ -3,11 +3,18 @@ import http from 'http'
 import{ Server } from 'socket.io'
 import cors from 'cors'
 import bodyParser from 'body-parser'
-import { startSocket } from './socket'
+import { socketServer } from './socket'
+
+import { statusRouter } from "./routes/status";
+import { boxRouter } from './routes/box'
+import {userRouter} from './routes/user'
+import {signRouter} from "./routes/sign";
+
+import { PrismaClient } from '@prisma/client'
 
 const app = express()
 const httpServer = http.createServer(app)
-const io = new Server<
+export const io : Server = new Server<
 ClientToServerEvents,
 ServerToClientEvents,
 InterServerEvents,
@@ -15,7 +22,7 @@ SocketData
 >(httpServer, { cors: { origin: '*', credentials: true }})
 
 export let secret = "jP830iVZxa_9OPKOw4EvSsca4r6lpWNnjsRMwvsVAuM"
-
+export const prisma = new PrismaClient()
 interface ServerToClientEvents {
     noArg: () => void;
     basicEmit: (a: number, b: string, c: Buffer) => void;
@@ -40,19 +47,19 @@ app.set('port', 3000)
 app.use(bodyParser.json())
 app.use(cors())
 
-import {signRouter} from "./routes/sign";
+
 app.use('/sign', signRouter)
 
-import {userRouter} from './routes/user'
+
 app.use('/user', userRouter)
 
-import { boxRouter } from './routes/box'
+
 app.use('/box', boxRouter)
 
-import { statusRouter } from "./routes/status";
+
 app.use('/status', statusRouter)
 
 httpServer.listen(app.get('port'), () => {
-    startSocket(io)
+    socketServer.startSocket(io)
     console.log("Starting the API on 3000");
 })

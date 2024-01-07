@@ -31,14 +31,17 @@
         };
         autofocus(nameInput)
     }
+    const cancelEditName = () => {
+        boxName = box.name
+        inputDisabled = true
+    }
     const regex = /[\p{Letter}\p{Mark}]+/gu
-    const updateBoxName = () => {
+    const updateBoxName = async () => {
 
         boxName = boxName.match(regex)?.join("") ?? ""
         if (!inputDisabled) {
-            if (boxName.length >= 3){
+            if (boxName.length >= 3 && (await delidock.updateName(box,boxName)).status === 200){
                 inputDisabled = true
-                delidock.updateName(box,boxName)
             } else {
 
                 nameError = true
@@ -179,9 +182,13 @@
                 <button class="active:scale-90 transition-transform ease-in-out scale-95" on:click={()=>editName()}>
                     <EditPenIcon/>
                 </button>
+                
                 {:else}
                 <button class="active:scale-90 transition-transform ease-in-out scale-95" on:click={()=>updateBoxName()}>
                     <CheckmarkIcon/>
+                </button>
+                <button class="active:scale-90 transition-transform ease-in-out scale-95" on:click={()=>cancelEditName()}>
+                    <CrossIcon/>
                 </button>
             {/if}
 

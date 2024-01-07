@@ -8,7 +8,7 @@
 	import { fly } from "svelte/transition";
 
     onMount( async ()=> {
-        if (delidock.checkToken()) {
+        if (await delidock.checkToken()) {
             goto('/home', {replaceState: true})
         }
         await SplashScreen.hide();

@@ -4,6 +4,6 @@ import { get } from "svelte/store";
 
 export function load() {
     if (!get(registerUser)) {
-        throw redirect(304, '/sign/up')
+        throw redirect(301, '/sign/up')
     }
 }

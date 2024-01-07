@@ -15,10 +15,11 @@
     const formReset = () => {
         email=''
         password=''
+        rememberMe = false
     }
 
     const handleLogin = async () => {
-        const response = await delidock.login(email, password)
+        const response = await delidock.login(email, password, rememberMe)
         switch (response.status) {
             case 200:
                 formReset()

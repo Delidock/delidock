@@ -21,6 +21,7 @@ const config: CapacitorConfig = {
       launchFadeOutDuration: 0,
       
     },
+    
   }
 };
 
