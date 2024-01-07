@@ -1,1 +1,0 @@
-export {default as Doggo} from './doggo.svg'
