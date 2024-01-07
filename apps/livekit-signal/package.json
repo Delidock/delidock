@@ -1,0 +1,7 @@
+{
+    "name": "livekit-signal",
+    "scripts": {
+        "docker-build": "docker build -t livekit-signal .",
+        "dev": "docker run -p 7880-7882:7880-7882 --expose=50000-60000 livekit-signal"
+    }
+}

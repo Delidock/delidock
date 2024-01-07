@@ -1,0 +1,14 @@
+{
+    "name": "@delidock/types",
+    "main": "build/index.js",
+    "types": "src/index.ts",
+    "scripts": {
+        "build": "tsc"
+    },
+    "devDependencies": {
+        "typescript": "^5.3.3"
+    },
+    "dependencies": {
+        "mongodb": "^6.3.0"
+    }
+}

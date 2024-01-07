@@ -1,0 +1,22 @@
+version: "2.1"
+
+services:
+  client:
+    build: ./../apps/client
+
+  delidock-server:
+    build: ./../apps/delidock-server
+  
+  router:
+    build: ./proxy
+    ports:
+      - 8888:80
+      - 7880:7880
+      - 7881:7881
+      - 7882:7882
+
+  livekit-server:
+    build: ./../apps/livekit-server
+
+  livekit-signal:
+    build: ./../apps/livekit-signal
