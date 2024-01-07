@@ -28,5 +28,5 @@ yarn-error.log*
 
 # turbo
 .turbo
-
+build
 proxy
