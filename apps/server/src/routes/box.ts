@@ -59,7 +59,7 @@ boxRouter.put('/:box/name', passport.authenticate('jwt', {session: false}), asyn
                     }
                 })
                 if (box) {
-                    io.to(`box:allowed:${req.params.box}`).to(`box:managed:${req.params.box}`).emit("boxNameChanged", req.params.box, req.body.name)
+                    io.of('/ws/users').to(`box:allowed:${req.params.box}`).to(`box:managed:${req.params.box}`).emit("boxNameChanged", req.params.box, req.body.name)
                     res.send().status(200)
                 } else {
                     res.send().status(404)
