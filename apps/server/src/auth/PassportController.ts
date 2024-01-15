@@ -34,7 +34,7 @@ export const usePassportController = (passport: PassportStatic) => {
                     id: jwt_payload.id
                 }
             })
-            if (box && box.activated) {
+            if (box) {
                 done(null, box)
             } else {
                 done(null, false)

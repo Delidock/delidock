@@ -1,16 +1,39 @@
-import express, { Request } from "express";
+import express from "express";
 import { usePassportController } from "../auth";
 import passport from "passport";
-
 import { io, prisma } from "../index";
-import { User } from "@delidock/types";
+import { BoxAddNewBody, User } from "@delidock/types";
 import { createToken } from "../utils/livekit";
 
 export const boxRouter =  express.Router()
 
 usePassportController(passport)
 
-boxRouter.get('/:box/unlock', passport.authenticate('user', {session: false}), (req: Request, res) => {
+boxRouter.post('/activate', passport.authenticate('user', {session: false}), async (req, res) => {
+    const body : BoxAddNewBody = req.body
+    if (req.user && body) {
+        const user = req.body as User
+        try {
+            const newBox = await prisma.box.findUnique({
+                where: {
+                    id: body.id
+                }
+            })
+            if (newBox) {
+                io.of('/ws/boxes').to(`box:${newBox.id}`).emit('activate', user.id, body.generatedToken)
+                res.status(200).send()
+            } else {
+                res.status(404).send()
+            }
+        } catch (error) {
+            res.status(404).send()
+        }
+    } else {
+        res.status(401).send()
+    }
+})
+
+boxRouter.get('/:box/unlock', passport.authenticate('user', {session: false}), (req, res) => {
     
     if (req.user) {
         const user = req.user as User

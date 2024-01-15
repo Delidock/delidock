@@ -1,12 +1,11 @@
 import { goto } from "$app/navigation"
-import type { Box, BoxClient, LoginRequestBody, RegisterConfirmRequestBody, RegisterRequestBody, RegisterUser } from "@delidock/types"
+import type { BoxClient, LoginRequestBody, RegisterConfirmRequestBody, RegisterRequestBody, RegisterUser } from "@delidock/types"
 import { Preferences } from '@capacitor/preferences';
 import Cookies, { type Cookie } from "universal-cookie"
 import { type Socket, io } from 'socket.io-client'
 import { socketListen, socketStop } from "./socket"
 import { boxes, socketStore } from "$lib/stores"
 import { PUBLIC_API_URL, PUBLIC_LIVEKIT_URL } from '$env/static/public';
-import { Update } from "./BoxUpdater"
 
 class Delidock {
     api : string = PUBLIC_API_URL ?? "https://delidock-api.stepskop.xyz"
@@ -146,7 +145,7 @@ class Delidock {
         socketStore.set(null)
     }
 
-    unlock = (box: Box) =>{
+    unlock = (box: BoxClient) =>{
         fetch(`${this.api}/box/${box.id}/unlock`, {
             headers: {
                 Authorization: "Bearer "+this.cookies.get('token')
@@ -154,12 +153,15 @@ class Delidock {
         })
     }
     
-    changePin = (box: BoxClient) => {
+    changePin = async (box: BoxClient) => {
+        return await fetch(`${this.api}/box/${box.id}/change`, {
+            headers: {
+                Authorization: "Bearer "+this.cookies.get('token')
+            }
+        })
 
-        //fetch change
-        Update(box, 'lastPIN', "321458")
     }
-    updateName = async (box: Box, boxName: string) => {
+    updateName = async (box: BoxClient, boxName: string) => {
         return await fetch(`${this.api}/box/${box.id}/name`, {
             headers: {
                 'Accept': 'application/json',

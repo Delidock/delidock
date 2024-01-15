@@ -29,20 +29,32 @@ export const socketListen = (socket: Socket) => {
         }
     })
 
-    socket.on('boxUnlocked', (id:string) => {
-        const boxIndex = get(boxes).findIndex((b:BoxClient) => b.id === id) 
-        if (boxIndex >= 0) {
-            
-            
-            Update(get(boxes)[boxIndex], 'lastStatus', true)
+    socket.on('boxAddNew', (box: BoxClient)=> {
+        if (!get(boxes).some((b:BoxClient) => b.id === box.id)) {
+
+            //CONTINUE SETUP
+
+            boxes.update((b: BoxClient[]) => [...b, box])
+        } else {
+            //ALREADY ADDED
         }
     })
+    socket.on('boxAddFailed', ()=> {
+        //STOP ADDING
+    })
+    socket.on('boxUnlocked', (id:string) => {
+        Update(id, 'lastStatus', true)
+    })
 
+    socket.on('boxLocked', (id: string) => {
+        Update(id, 'lastStatus', false)
+    })
     socket.on('boxNameChanged', (id:string, name: string) => {
-        const boxIndex = get(boxes).findIndex((b:BoxClient) => b.id === id) 
-        if (boxIndex >= 0) {
-            Update(get(boxes)[boxIndex], 'name', name)
-        }
+        Update(id, 'name', name)
+    })
+
+    socket.on('boxChanged', (id:string, pin: string) => {
+        Update(id, 'lastPIN', pin)
     })
 
 }

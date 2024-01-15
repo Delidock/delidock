@@ -3,7 +3,11 @@
     import { GlobeIcon, GearIcon, EditPenIcon, CheckmarkIcon, CameraIcon, BoxIcon, CrossIcon, ResetIcon, UnlockIcon, BigCrossIcon } from '$lib/assets/icons'
 	import { StatusWidget, BoxButton, PinBox} from '$lib/components';
     import type { BoxClient } from '@delidock/types';
+	import { tick } from 'svelte';
+	import { delidock } from '$lib/utils/delidock.js';
 
+    import { type Participant, RemoteParticipant, Room, RoomEvent, Track, type RoomOptions } from 'livekit-client';
+	import { boxes } from '$lib/stores/index.js';
     enum LivekitState {
         DISCONNECTED = 0,
         VIEW = 1,
@@ -11,12 +15,6 @@
         BOXCONNECTED = 3,
         BOXVIDEO = 4,
     }
-	import { tick } from 'svelte';
-	import { delidock } from '$lib/utils/delidock.js';
-
-    import { type Participant, RemoteParticipant, Room, RoomEvent, Track, type RoomOptions } from 'livekit-client';
-	import { boxes } from '$lib/stores/index.js';
-
     export let data
     
     let box : BoxClient = $boxes[data.boxId]

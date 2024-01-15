@@ -34,6 +34,25 @@ class SocketServer{
 
             if (boxPayload && (boxPayload.role === RoleId.Box)) {
                 socket.join(`box:${boxPayload.id}`)
+                try {
+                    const box = await prisma.box.findUnique({
+                        where: {
+                            id: boxPayload.id
+                        }
+                    })
+                    if (box) {
+                        socket.emit('initializing')
+                        if (box.activated) {
+                            socket.emit('initialized', {pin: box.lastPIN})
+                        } else if (!box.activated) {
+                            socket.emit('activation')
+                        }
+                    } else {
+                        socket.disconnect()
+                    }
+                } catch (error) {
+                    socket.disconnect()
+                }
             } else {
                 socket.disconnect()
             }
@@ -64,7 +83,9 @@ class SocketServer{
                             const managedBoxes = await prisma.box.findMany({where: {
                                 id: {in: managedBoxesIds}
                             }})
-    
+                            socket.emit('initializing')
+
+                            socket.join(`user:${user.id}`)
                             for (const allowedBox of allowedBoxes) {
                                 if (allowedBox.activated && allowedBox.lastPIN){
                                     const box : BoxClient = {
@@ -91,7 +112,7 @@ class SocketServer{
                                     socket.emit('boxAdd', box)
                                 }
                             }
-    
+                            socket.emit('initialized')
                         } else {
                             socket.disconnect()  
                         }

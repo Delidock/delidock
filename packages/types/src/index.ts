@@ -23,6 +23,21 @@ export interface BoxLoginBody {
     id: string
     psk: string
 }
+
+export interface BoxAddNewBody {
+    id: string
+    generatedToken: string
+}
+
+export enum ActivationStatus {
+    'OK',
+    'NOT_OK'
+}
+export interface ActivationBody {
+    userId: string
+    status: ActivationStatus
+}
+
 export interface BoxChangePinBody {
     newPin: string
 }
