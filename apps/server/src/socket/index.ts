@@ -2,12 +2,16 @@ import { instrument } from "@socket.io/admin-ui";
 import { Server, Socket } from "socket.io";
 import jwt from "jsonwebtoken";
 import { PrismaClient } from "@prisma/client";
-import { BoxClient, RoleId, UserJwtPayload } from "@delidock/types"
+import { BoxClient, BoxJwtPayload, RoleId, UserJwtPayload } from "@delidock/types"
 class SocketServer{
     io : Server | null = null
-    socket : Socket | null = null
-    getSocket = () => {
-        return this.socket
+    userSocket : Socket | null = null
+    boxSocket : Socket | null = null
+    getUserSocket = () => {
+        return this.userSocket
+    }
+    getBoxSocket = () => {
+        return this.boxSocket
     }
 
     startSocket = (io : Server) => {
@@ -20,17 +24,23 @@ class SocketServer{
             },
           });
     
-        let messages : {id: string, content: string}[] = []
-        let roomMessages : {id: string, content: string, time: string}[] = []
-    
-        function generateRandomNumber() {
-            var minm = 100000;
-            var maxm = 999999;
-            return Math.floor(Math
-            .random() * (maxm - minm + 1)) + minm;
-        }
+        
+        io.of("/ws/boxes").on("connection", async (socket : Socket) => {
+            this.boxSocket = socket
+            if (!jwt.verify(socket.handshake.auth.token, process.env.DELIDOCK_API_SECRET ?? "")   ) {
+                socket.disconnect()    
+            }
+            const boxPayload = jwt.decode(socket.handshake.auth.token, { json: true}) as BoxJwtPayload | null
+
+            if (boxPayload && (boxPayload.role === RoleId.Box)) {
+                socket.join(`box:${boxPayload.id}`)
+            } else {
+                socket.disconnect()
+            }
+        })
+
         io.of("/ws/users").on("connection", async (socket : Socket)=>{
-            this.socket = socket
+            this.userSocket = socket
             try {
                 if (!jwt.verify(socket.handshake.auth.token, process.env.DELIDOCK_API_SECRET ?? "")   ) {
                     socket.disconnect()    

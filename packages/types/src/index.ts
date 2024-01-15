@@ -19,6 +19,14 @@ export interface LoginRequestBody {
     password: string
 }
 
+export interface BoxLoginBody {
+    id: string
+    psk: string
+}
+export interface BoxChangePinBody {
+    newPin: string
+}
+
 export interface User{
     id: string,
     createdAt: Date
@@ -46,7 +54,7 @@ export interface BoxJwtPayload {
 export interface Box {
     id: string
     lastPIN: string
-    lastStatus: boolean
+    lastStatus: boolean 
     name: string
 }
 export interface BoxClient extends Box {
@@ -56,6 +64,7 @@ export interface BoxServer extends Box {
     createdAt: Date
     updatedAt: Date
     activated: boolean
+    pskHash: string
 }
 
 export enum LivekitDisconnected {

@@ -12,7 +12,6 @@ import {userRouter} from './routes/user'
 import {signRouter} from "./routes/sign";
 
 import { PrismaClient } from '@prisma/client'
-
 const app = express()
 const httpServer = http.createServer(app)
 export const io : Server = new Server<ClientToServerEvents,ServerToClientEvents,InterServerEvents,SocketData>(httpServer, {
@@ -21,7 +20,7 @@ export const io : Server = new Server<ClientToServerEvents,ServerToClientEvents,
     credentials: true 
   }
 })
-export const prisma = new PrismaClient()
+export const prisma : PrismaClient = new PrismaClient()
 interface ServerToClientEvents {
     noArg: () => void;
     basicEmit: (a: number, b: string, c: Buffer) => void;

@@ -1,2 +1,2 @@
-export * from './UserPassportController'
+export * from './PassportController'
 
