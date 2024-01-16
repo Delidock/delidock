@@ -29,3 +29,6 @@ html {
 .blur {
     filter: blur(1.2rem);
 }
+.scan-region-highlight svg{
+    stroke: #e7e7f2 !important;
+}

@@ -19,11 +19,11 @@ boxRouter.post('/activate', passport.authenticate('user', {session: false}), asy
                     id: body.id
                 }
             })
-            if (newBox) {
+            if (newBox && !newBox.activated) {
                 io.of('/ws/boxes').to(`box:${newBox.id}`).emit('activate', user.id, body.generatedToken)
                 res.status(200).send()
             } else {
-                res.status(404).send()
+                res.status(400).send()
             }
         } catch (error) {
             res.status(404).send()

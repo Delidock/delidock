@@ -54,7 +54,7 @@
             </div>
             <div class="flex flex-row justify-between items-center">
                 <h4 class="text-text_color text-xs">Availible boxes:</h4>
-                <button class="transition-transform ease-in-out active:scale-90"><PlusIcon/></button>
+                <button on:click={()=>goto('/home/add', {replaceState: true})} class="transition-transform ease-in-out active:scale-90"><PlusIcon/></button>
             </div>
         </div>
         <div class="flex flex-col gap-1">

@@ -60,7 +60,6 @@ statusRouter.post('/activate', passport.authenticate('box', {session: false}), a
     const box = req.user as BoxServer | undefined
     const body : ActivationBody = req.body
     if (box) {
-        
         try {
             const user = await prisma.user.update({
                 where: {
@@ -102,10 +101,7 @@ statusRouter.post('/activate', passport.authenticate('box', {session: false}), a
         } catch (error) {
             res.status(404).send()
         }
-    } else if (box && body.status === ActivationStatus.NOT_OK) {
-
-        res.status(200).send()
-    } {
+    } else {
         res.status(401).send()
     }
 })

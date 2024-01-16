@@ -13,9 +13,9 @@
 		"format": "prettier --write ."
 	},
 	"devDependencies": {
-		"@delidock/types":"workspace:*",
 		"@capacitor/assets": "3.0.4",
 		"@capacitor/cli": "^5.6.0",
+		"@delidock/types": "workspace:*",
 		"@sveltejs/adapter-static": "^2.0.3",
 		"@sveltejs/kit": "^1.27.7",
 		"@typescript-eslint/eslint-plugin": "^6.0.0",
@@ -43,6 +43,7 @@
 		"@capacitor/preferences": "^5.0.6",
 		"@capacitor/splash-screen": "^5.0.6",
 		"livekit-client": "^1.15.5",
+		"qr-scanner": "^1.4.2",
 		"socket.io-client": "^4.7.2",
 		"universal-cookie": "^6.1.1"
 	}

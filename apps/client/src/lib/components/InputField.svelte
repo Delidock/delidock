@@ -39,10 +39,15 @@
     }
     
 </script>
-<div id={id}>
+<div id={id} class="shadow">
     <p class:!text-red={formInvalid} class="text-xs text-text_color mb-1">{title}</p>
     <div class:!border-red={formInvalid} class:!border-green={green} class="transition-colors ease-in-out w-full h-16 bg-secondary border-2 border-btn_secondary rounded-lg text-text_color text-base flex-row flex px-3 items-center gap-3">
         <svelte:component this={icon}/>
         <input {...{type}} class="w-full h-full bg-secondary outline-none" name={label} bind:value={value} on:invalid|preventDefault={ ()=> {error = displayError()}} on:input={()=> onInput()} required>
     </div>
 </div>
+<style>
+    .shadow {
+        box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25); 
+    }
+</style>

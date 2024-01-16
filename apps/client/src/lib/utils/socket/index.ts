@@ -1,5 +1,5 @@
 import { goto } from "$app/navigation";
-import { boxes } from "$lib/stores";
+import { AddNewStatus, addingStatus, boxes } from "$lib/stores";
 import type { BoxClient } from "@delidock/types";
 import type { Socket } from "socket.io-client";
 import { get } from "svelte/store";
@@ -31,7 +31,7 @@ export const socketListen = (socket: Socket) => {
 
     socket.on('boxAddNew', (box: BoxClient)=> {
         if (!get(boxes).some((b:BoxClient) => b.id === box.id)) {
-
+            addingStatus.set(AddNewStatus.SUCESS)
             //CONTINUE SETUP
 
             boxes.update((b: BoxClient[]) => [...b, box])
@@ -40,7 +40,8 @@ export const socketListen = (socket: Socket) => {
         }
     })
     socket.on('boxAddFailed', ()=> {
-        //STOP ADDING
+        addingStatus.set(AddNewStatus.FAIL)
+        // POPUP
     })
     socket.on('boxUnlocked', (id:string) => {
         Update(id, 'lastStatus', true)
@@ -50,6 +51,7 @@ export const socketListen = (socket: Socket) => {
         Update(id, 'lastStatus', false)
     })
     socket.on('boxNameChanged', (id:string, name: string) => {
+        //addingStatus.set(AddNewStatus.SUCESS)
         Update(id, 'name', name)
     })
 

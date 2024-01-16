@@ -1,5 +1,5 @@
 import { goto } from "$app/navigation"
-import type { BoxClient, LoginRequestBody, RegisterConfirmRequestBody, RegisterRequestBody, RegisterUser } from "@delidock/types"
+import type { BoxAddNewBody, BoxClient, LoginRequestBody, RegisterConfirmRequestBody, RegisterRequestBody, RegisterUser } from "@delidock/types"
 import { Preferences } from '@capacitor/preferences';
 import Cookies, { type Cookie } from "universal-cookie"
 import { type Socket, io } from 'socket.io-client'
@@ -7,7 +7,7 @@ import { socketListen, socketStop } from "./socket"
 import { boxes, socketStore } from "$lib/stores"
 import { PUBLIC_API_URL, PUBLIC_LIVEKIT_URL } from '$env/static/public';
 
-class Delidock {
+export class Delidock {
     api : string = PUBLIC_API_URL ?? "https://delidock-api.stepskop.xyz"
     livekitIp : string = PUBLIC_LIVEKIT_URL ?? "https://delidock-livekit.stepskop.xyz"
     token : string = ""
@@ -145,6 +145,22 @@ class Delidock {
         socketStore.set(null)
     }
 
+    addNew = async (boxId: string, boxToken: string) => {
+        const body : BoxAddNewBody = {id: boxId, generatedToken: boxToken}
+        const res = await fetch(`${this.api}/box/activate`, {
+            method: 'post',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                Authorization: "Bearer "+this.cookies.get('token')
+            },
+            body: JSON.stringify(body)
+        })
+
+        return res
+    }
+
+    //BOX OPS
     unlock = (box: BoxClient) =>{
         fetch(`${this.api}/box/${box.id}/unlock`, {
             headers: {
@@ -172,5 +188,8 @@ class Delidock {
             body: JSON.stringify({name: boxName})
         })
 	}
+
 }
+
+
 export const delidock = new Delidock
