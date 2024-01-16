@@ -41,7 +41,9 @@ export interface ActivationBody {
 export interface BoxChangePinBody {
     newPin: string
 }
-
+export interface BoxInviteBody {
+    email: string
+}
 export interface User{
     id: string,
     createdAt: Date

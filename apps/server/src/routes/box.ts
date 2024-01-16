@@ -2,8 +2,9 @@ import express from "express";
 import { usePassportController } from "../auth";
 import passport from "passport";
 import { io, prisma } from "../index";
-import { BoxAddNewBody, User } from "@delidock/types";
+import { BoxAddNewBody, BoxClient, BoxInviteBody, User, UserUsingBox } from "@delidock/types";
 import { createToken } from "../utils/livekit";
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 
 export const boxRouter =  express.Router()
 
@@ -91,6 +92,101 @@ boxRouter.put('/:box/name', passport.authenticate('user', {session: false}), asy
             }
         } else {
             res.status(401).send()
+        }
+    } else {
+        res.status(401).send()
+    }
+})
+
+boxRouter.post('/:box/invite', passport.authenticate('user', {session: false}), async(req, res) => {
+    const user = req.user as User
+    const body : BoxInviteBody = req.body
+    if (user && user.managedBoxes.includes(req.params.box)) {
+        try {
+            const invitee = await prisma.user.update({
+                where: {
+                    email: body.email,
+                    NOT: [
+                        {
+                            allowedBoxes: {has: req.params.box}
+                        },
+                        {
+                            managedBoxes: {has: req.params.box}
+                        }
+                    ]
+                },
+          
+                data: {
+                    allowedBoxes: {
+                        push: req.params.box
+                    }
+                }
+            })
+
+            if (!invitee) {
+                res.status(404).send()
+                return 
+            }
+            const newBox = await prisma.box.update({
+                where: {
+                    id: req.params.box,
+                    NOT: {
+                        users: {has: invitee.id}
+                    }
+                },
+                data: {
+                    users: {
+                        push: invitee.id
+                    }
+                }
+            })
+            if (!newBox) {
+                res.status(404).send()
+                return 
+            }
+
+            let users : UserUsingBox[] = []
+            const usersByBox = await prisma.user.findMany({where: {
+                OR: [
+                    {
+                        allowedBoxes: {has: newBox.id}
+                    },
+                    {
+                        managedBoxes: {has: newBox.id}
+                    },
+                ],
+                NOT: {
+                    id: invitee.id
+                }
+            }})
+
+            for(const userByBox of usersByBox){
+                if (userByBox.managedBoxes.includes(newBox.id)) {
+                    users.push({name: `${userByBox.firstName} ${userByBox.lastName}`, email: userByBox.email, managing: true})
+                } else if (userByBox.allowedBoxes.includes(newBox.id)) {
+                    users.push({name: `${userByBox.firstName} ${userByBox.lastName}`, email: userByBox.email, managing: false})
+                }
+            }
+
+            const clientBox : BoxClient = {
+                managed: false,
+                id: newBox.id,
+                lastPIN: newBox.lastPIN,
+                lastStatus: newBox.lastStatus,
+                name: newBox.name,
+                users
+            }
+            
+            const usingUser : UserUsingBox = {name: `${invitee.firstName} ${invitee.lastName}`, email: invitee.email, managing: false}
+            io.of('/ws/users').to(`user:${invitee.id}`).emit('boxAddInvite', clientBox)
+            io.of('/ws/users').to(`box:managed:${newBox.id}`).to(`box:allowed:${newBox.id}`).emit('userAdd', newBox.id, usingUser)
+            res.status(200).send()
+
+        } catch (error : any) {
+            if (error.code && (error.code === 'P2025')) {
+                res.status(404).send()
+            }
+            res.status(500).send()
         }
     } else {
         res.status(401).send()

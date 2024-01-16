@@ -1,5 +1,5 @@
 import { goto } from "$app/navigation"
-import type { BoxAddNewBody, BoxClient, LoginRequestBody, RegisterConfirmRequestBody, RegisterRequestBody, RegisterUser } from "@delidock/types"
+import type { BoxAddNewBody, BoxClient, BoxInviteBody, LoginRequestBody, RegisterConfirmRequestBody, RegisterRequestBody, RegisterUser } from "@delidock/types"
 import { Preferences } from '@capacitor/preferences';
 import Cookies, { type Cookie } from "universal-cookie"
 import { type Socket, io } from 'socket.io-client'
@@ -157,6 +157,19 @@ export class Delidock {
             body: JSON.stringify(body)
         })
 
+        return res
+    }
+    addUser = async (boxId: string, invitee: string) => {
+        const body : BoxInviteBody = {email: invitee}
+        const res = await fetch(`${this.api}/box/${boxId}/invite`, {
+            method: 'post',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                Authorization: "Bearer "+this.cookies.get('token')
+            },
+            body: JSON.stringify(body)
+        })
         return res
     }
 

@@ -1,6 +1,6 @@
 import { goto } from "$app/navigation";
 import { AddNewStatus, addingStatus, boxes } from "$lib/stores";
-import type { BoxClient } from "@delidock/types";
+import type { BoxClient, UserUsingBox } from "@delidock/types";
 import type { Socket } from "socket.io-client";
 import { get } from "svelte/store";
 import Cookies from "universal-cookie";
@@ -30,15 +30,22 @@ export const socketListen = (socket: Socket) => {
     })
 
     socket.on('boxAddNew', (box: BoxClient)=> {
+        addingStatus.set(AddNewStatus.SUCESS)
         if (!get(boxes).some((b:BoxClient) => b.id === box.id)) {
-            addingStatus.set(AddNewStatus.SUCESS)
-            //CONTINUE SETUP
-
             boxes.update((b: BoxClient[]) => [...b, box])
-        } else {
-            //ALREADY ADDED
+            socket.emit('rejoin', box.id)
         }
+        
     })
+
+    socket.on('boxAddInvite', (box: BoxClient) => {
+        if (!get(boxes).some((b:BoxClient) => b.id === box.id)) {
+            boxes.update((b: BoxClient[]) => [...b, box])
+            socket.emit('rejoin', box.id)
+        }
+        
+    })
+
     socket.on('boxAddFailed', ()=> {
         addingStatus.set(AddNewStatus.FAIL)
         // POPUP
@@ -57,6 +64,15 @@ export const socketListen = (socket: Socket) => {
 
     socket.on('boxChanged', (id:string, pin: string) => {
         Update(id, 'lastPIN', pin)
+    })
+
+    socket.on('userAdd', (id: string, user: UserUsingBox) => {
+        let gotBoxes = get(boxes)
+        let boxId = gotBoxes.findIndex((e) => e.id === id)
+        if (boxId >= 0) {
+            Update(id, 'users', [...gotBoxes[boxId].users, user])
+        }
+        
     })
 
 }

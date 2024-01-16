@@ -1,13 +1,14 @@
 <script lang="ts">
     import { goto } from '$app/navigation';
     import { GlobeIcon, GearIcon, EditPenIcon, CheckmarkIcon, CameraIcon, BoxIcon, CrossIcon, ResetIcon, UnlockIcon, BigCrossIcon, PlusIcon, BoxUserIcon, AdminIcon } from '$lib/assets/icons'
-	import { StatusWidget, BoxButton, PinBox} from '$lib/components';
+	import { StatusWidget, BoxButton, PinBox, InputField, Button} from '$lib/components';
     import type { BoxClient } from '@delidock/types';
 	import { tick } from 'svelte';
 	import { delidock } from '$lib/utils/delidock.js';
 
     import { type Participant, RemoteParticipant, Room, RoomEvent, Track, type RoomOptions } from 'livekit-client';
 	import { boxes } from '$lib/stores/index.js';
+	import { slide } from 'svelte/transition';
     enum LivekitState {
         DISCONNECTED = 0,
         VIEW = 1,
@@ -178,13 +179,41 @@
         }
     }
 
-    const addUserPopUp = ( )=> {
-
+    let addUserPopup : boolean = false
+    let inviteError : string
+    let inviteUserEmail : string
+    const addUserPop = ( )=> {
+        addUserPopup = true
     }
 
+    const popOut = () => {
+        inviteError = ""
+        inviteUserEmail = ""
+        addUserPopup = false
+    }
     
+    const addUser = async () => {
+        const res = await delidock.addUser(box.id, inviteUserEmail)
+        switch (res.status) {
+            case 200:
+                popOut()
+                return;
+            case 401:
+                inviteError = ""
+                inviteError = "Unauthorized"
+                return
+            case 404:
+                inviteError = ""
+                inviteError = "User not found or already added"
+                return
+            default:
+                inviteError = ""
+                inviteError = "Something went wrong"
+                break;
+        }
+    }
 </script>
-<div class="w-full min-h-[100svh] relative bg-background flex flex-col">
+<div class="w-full min-h-[100svh] relative bg-background flex flex-col" class:blur-sm={addUserPopup} class:grayscale-[100%]={addUserPopup}>
     <div class="sticky top-0 flex flex-row items-center justify-between px-4 h-16 bg-background z-20">
         <button on:click|preventDefault={()=>goto("/home")} class=" active:scale-90 transition-transform ease-in-out"><BigCrossIcon/></button>
         <div class="flex flex-row gap-2" class:invalid={nameError} >
@@ -260,7 +289,7 @@
                 </div>
                 <div class="w-1/2 flex justify-end">
                     {#if box.managed}
-                        <button on:click={()=>addUserPopUp()} class="transition-transform ease-in-out active:scale-90"><PlusIcon/></button>
+                        <button on:click={()=>addUserPop()} class="transition-transform ease-in-out active:scale-90"><PlusIcon/></button>
                     {/if}
                 </div>
             </div>
@@ -285,6 +314,27 @@
         </div>
     </section>
 </div>
+{#if addUserPopup}
+    <div transition:slide={{axis:"y"}} class="w-full h-[calc(100vh-4rem)] absolute bottom-0 px-2">
+        <div class=" bg-secondary rounded-t-[1rem] pt-4 px-4 h-full w-full flex flex-col gap-2">
+            {#if addUserPopup}
+                <div class="flex flex-row items-center">
+                    <div class="w-4/6 flex justify-start text-start text-text_color text-2xl">
+                        <p>Add user</p>
+                    </div>
+                    <div class="w-2/6 flex justify-end">
+                        <button on:click|preventDefault={()=>popOut()} class="active:scale-90 transition-transform ease-in-out"><CrossIcon/></button>
+                    </div>
+                </div>
+                <p class="text-text_color text-sm mb-2">Make others able to use your box. Add them via their email.</p>
+                <form on:submit|preventDefault={()=>addUser()} class="flex flex-col gap-2">
+                    <InputField label="Invitee's email" error={inviteError} bind:value={inviteUserEmail} type="email"/>
+                    <Button label="Add user" type='submit'/>
+                </form>
+            {/if}
+        </div>
+    </div>
+{/if}
 <style>
 
     .video-gradient {

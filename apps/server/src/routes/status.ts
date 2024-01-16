@@ -77,7 +77,10 @@ statusRouter.post('/activate', passport.authenticate('box', {session: false}), a
                         id: box.id
                     },
                     data: {
-                        activated: true
+                        activated: true,
+                        users: {
+                            push: user.id
+                        }
                     }
                 })
                 let users : UserUsingBox[] = []
