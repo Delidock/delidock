@@ -2,7 +2,7 @@ import express from "express";
 import passport from "passport";
 import { usePassportController } from "../auth";
 import { createToken } from "../utils/livekit";
-import { ActivationBody, ActivationStatus, BoxChangePinBody, BoxClient, BoxJwtPayload, BoxLoginBody, BoxServer, RoleId } from "@delidock/types";
+import { ActivationBody, ActivationStatus, BoxChangePinBody, BoxClient, BoxJwtPayload, BoxLoginBody, BoxServer, RoleId, UserUsingBox } from "@delidock/types";
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import { io, prisma } from "..";
@@ -80,13 +80,35 @@ statusRouter.post('/activate', passport.authenticate('box', {session: false}), a
                         activated: true
                     }
                 })
+                let users : UserUsingBox[] = []
+                const usersByBox = await prisma.user.findMany({where: {
+                    OR: [
+                        {
+                            allowedBoxes: {has: box.id}
+                        },
+                        {
+                            managedBoxes: {has: box.id}
+                        },
+                    ],
+                    NOT: {
+                        id: user.id
+                    }
+                }})
 
+                for(const userByBox of usersByBox){
+                    if (userByBox.managedBoxes.includes(box.id)) {
+                        users.push({name: `${userByBox.firstName} ${userByBox.lastName}`, email: userByBox.email, managing: true})
+                    } else if (userByBox.allowedBoxes.includes(box.id)) {
+                        users.push({name: `${userByBox.firstName} ${userByBox.lastName}`, email: userByBox.email, managing: false})
+                    }
+                }
                 const clientBox : BoxClient = {
                     managed: true,
                     id: box.id,
                     lastPIN: box.lastPIN,
                     lastStatus: box.lastStatus,
-                    name: box.name
+                    name: box.name,
+                    users
                 }
 
                 io.of('/ws/users').to(`user:${body.userId}`).emit('boxAddNew', clientBox)

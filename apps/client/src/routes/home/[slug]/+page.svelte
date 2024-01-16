@@ -1,6 +1,6 @@
 <script lang="ts">
     import { goto } from '$app/navigation';
-    import { GlobeIcon, GearIcon, EditPenIcon, CheckmarkIcon, CameraIcon, BoxIcon, CrossIcon, ResetIcon, UnlockIcon, BigCrossIcon } from '$lib/assets/icons'
+    import { GlobeIcon, GearIcon, EditPenIcon, CheckmarkIcon, CameraIcon, BoxIcon, CrossIcon, ResetIcon, UnlockIcon, BigCrossIcon, PlusIcon, BoxUserIcon, AdminIcon } from '$lib/assets/icons'
 	import { StatusWidget, BoxButton, PinBox} from '$lib/components';
     import type { BoxClient } from '@delidock/types';
 	import { tick } from 'svelte';
@@ -177,9 +177,15 @@
             livekitState = LivekitState.CONNECTED
         }
     }
+
+    const addUserPopUp = ( )=> {
+
+    }
+
+    
 </script>
-<div class="w-full min-h-screen bg-background pt-4 flex flex-col gap-4">
-    <div class="flex flex-row items-center justify-between px-4 h-8">
+<div class="w-full min-h-[100svh] relative bg-background flex flex-col">
+    <div class="sticky top-0 flex flex-row items-center justify-between px-4 h-16 bg-background z-20">
         <button on:click|preventDefault={()=>goto("/home")} class=" active:scale-90 transition-transform ease-in-out"><BigCrossIcon/></button>
         <div class="flex flex-row gap-2" class:invalid={nameError} >
             <input class:text-red={errorUnderline}  spellcheck="false" maxlength="20" on:keydown={(e) => e.key === 'Enter' && updateBoxName()} class=" text-center outline-none text-text_color bg-transparent" disabled='{inputDisabled}' type="text" style="width: {boxName.length}ch" bind:this={nameInput} bind:value={boxName} >
@@ -202,7 +208,7 @@
         <button class="active:scale-90 transition-transform ease-in-out"><GearIcon/></button>
     </div>
 
-    <section class="w-full min-h-[calc(100svh-4rem)] bg-secondary rounded-t-[2rem] flex flex-col gap-2 px-4 pt-4">
+    <section class="w-full min-h-[calc(100svh-4rem)] bg-secondary rounded-t-[2rem] flex flex-col gap-2 pb-4 px-4 pt-4">
         <div class="w-full justify-end flex">
             <StatusWidget open={box.lastStatus} />
         </div>
@@ -238,13 +244,43 @@
             
         </div>
 
-        <div class="w-full h-48 flex flex-col gap-2">
-            <div class="h-1/2">
+        <div class="w-full flex flex-col gap-2">
+            <div class="h-24">
                 <PinBox pin={box.lastPIN} copyText={copyText}/>
             </div>
-            <div class="w-full flex flex-row gap-1 h-1/3">
+            <div class="w-full flex flex-row gap-1 h-16">
                 <BoxButton label="Unlock" icon={UnlockIcon} on:click={()=>delidock.unlock(box)}/>
                 <BoxButton label="Change PIN" icon={ResetIcon} on:click={()=>changePIN()}/>
+            </div>
+        </div>
+        <div class="flex flex-col w-full gap-1 mt-2">
+            <div class="flex flex-row">
+                <div class="w-1/2 flex justify-start items-center">
+                    <p class="text-xs text-text_color">Users:</p>
+                </div>
+                <div class="w-1/2 flex justify-end">
+                    {#if box.managed}
+                        <button on:click={()=>addUserPopUp()} class="transition-transform ease-in-out active:scale-90"><PlusIcon/></button>
+                    {/if}
+                </div>
+            </div>
+            <div class="flex flex-col gap-2">
+                {#each box.users as boxUser}
+                    <div class="w-full h-16 bg-btn_secondary flex flex-row gap-2 solid-shadow rounded-lg p-3" class:border-btn_primary={boxUser.managing} class:border-2={boxUser.managing}>
+                        <div class="w-10 justify-center items-center">
+                            <BoxUserIcon/>
+                        </div>
+                        <div class="w-full flex flex-col items-start justify-center">
+                            <p class="text-xs text-text_color flex flex-row gap-2 justify-center items-center">{boxUser.name}{#if boxUser.managing}<span><div class="h-4 bg-secondary px-2 py-[1px] rounded-lg text-[0.5rem] text-center flex items-center gap-1"><AdminIcon/><p>ADMIN</p></div></span>{/if}</p>
+                            <p class="text-[10px] text-btn_primary">{boxUser.email}</p>
+                        </div>
+                        <div class="w-10 flex justify-center items-center">
+                            {#if !boxUser.managing && box.managed}
+                                <button class="transition-transform ease-in-out active:scale-90"><CrossIcon/></button>
+                            {/if}
+                        </div>
+                    </div>
+                {/each}
             </div>
         </div>
     </section>

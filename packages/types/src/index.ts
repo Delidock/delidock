@@ -54,6 +54,11 @@ export interface User{
     allowedBoxes: string[]
     managedBoxes: string[]
 }
+export interface UserUsingBox{
+    name: string
+    email: string
+    managing: boolean
+}
 
 export interface UserJwtPayload {
     id: string
@@ -74,12 +79,14 @@ export interface Box {
 }
 export interface BoxClient extends Box {
     managed: boolean
+    users: UserUsingBox[]
 }
 export interface BoxServer extends Box {
     createdAt: Date
     updatedAt: Date
     activated: boolean
     pskHash: string
+    users: string[]
 }
 
 export enum LivekitDisconnected {
