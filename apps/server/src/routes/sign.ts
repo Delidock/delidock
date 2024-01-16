@@ -69,8 +69,9 @@ signRouter.post("/in", async (req, res) => {
                 email: body.email
             }
         })
+        
         if (!user) {
-            res.send().status(401)
+            res.status(401).send()
             return
         }
         if (user && (bcrypt.compareSync(req.body.password, user.passwordHash))) {
@@ -81,9 +82,7 @@ signRouter.post("/in", async (req, res) => {
             
         }
         res.status(401).send()
-    } catch (error) {
-        console.log(error);
-        
+    } catch (error) {        
         res.status(404).send()
     }
     res.status(401).send()
