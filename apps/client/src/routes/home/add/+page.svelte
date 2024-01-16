@@ -6,6 +6,7 @@
     import QrScanner from "qr-scanner";
 	import { onDestroy, onMount } from "svelte";
 	import { slide } from "svelte/transition";
+    import placeholder from '$lib/assets/images/placeholder.png'
 
 
     let qrVideoElement : HTMLVideoElement | null = null
@@ -15,6 +16,7 @@
     let newBoxToken: string
     let enterManually : boolean = false
     let notScanning : boolean = false
+    let videoVisible : boolean = false
     onMount(()=>{
         startScanning()
     })
@@ -26,10 +28,12 @@
                 
             })
             qrError = ""
+            videoVisible = true
             qrScanner.start()
         }
     }
     const stopScanning = () => {
+        videoVisible = false
         qrScanner?.stop()
         qrScanner?.destroy()
     }
@@ -38,7 +42,7 @@
         newBoxIdentity = result.data.split(':')[0]
         newBoxToken = result.data.split(':')[1]
         addNewBox()
-        qrScanner?.stop()
+        stopScanning()
     }
 
     const doEnterManually = () => {
@@ -56,7 +60,6 @@
 
     let qrError : string = ""
     const tryQrAgain = (err: string) => {
-
         qrError = err
     }
 
@@ -76,7 +79,7 @@
             if (!enterManually) {
                 newBoxIdentity = ""
                 newBoxToken = ""
-                tryQrAgain("Wrong QR code")
+                tryQrAgain("Invalid QR code")
             }
             return
         }
@@ -114,7 +117,7 @@
                     errorToken = "Something went wrong"
                     errorIdentity = "Something went wrong"
                 } else {
-                    tryQrAgain("Wrong QR code")
+                    tryQrAgain("Invalid QR code")
                 }
                 return;
         }
@@ -136,7 +139,7 @@
     <div class="flex flex-col gap-4 h-[calc(100vh-4rem)] w-full bg-secondary rounded-t-[2rem] pt-4 px-4">
         <div class="relative aspect-square w-full rounded-lg border border-outline overflow-hidden qr-gradient">
             <!-- svelte-ignore a11y-media-has-caption -->
-            <video class=" h-full object-cover overflow-hidden aspect-square" bind:this={qrVideoElement} src=""></video>
+            <video placeholder={placeholder} class=" h-full object-cover overflow-hidden aspect-square"class:hidden={!videoVisible} bind:this={qrVideoElement} src=""></video>
             {#if qrError}
                 <div class="absolute w-full h-full top-0 bottom-0 flex flex-col justify-center items-center gap-2">
                     <p class="text-text_color text-lg">{qrError}</p>
