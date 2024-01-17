@@ -294,6 +294,18 @@
                 </div>
             </div>
             <div class="flex flex-col gap-2">
+                <div class="w-full h-16 bg-btn_secondary flex flex-row gap-2 solid-shadow rounded-lg p-3 border-btn_primary border-2">
+                    <div class="w-10 justify-center items-center">
+                        <BoxUserIcon/>
+                    </div>
+                    <div class="w-full flex flex-col items-start justify-center">
+                        <p class="text-xs text-text_color flex flex-row gap-2 justify-center items-center">{box.owner.name}<span><div class="h-4 bg-secondary px-2 py-[1px] rounded-lg text-[0.5rem] text-center flex items-center gap-1"><AdminIcon/><p>OWNER</p></div></span></p>
+                        <p class="text-[10px] text-btn_primary">{box.owner.email}</p>
+                    </div>
+                    <div class="w-10 flex justify-center items-center">
+                        
+                    </div>
+                </div>
                 {#each box.users as boxUser}
                     <div class="w-full h-16 bg-btn_secondary flex flex-row gap-2 solid-shadow rounded-lg p-3" class:border-btn_primary={boxUser.managing} class:border-2={boxUser.managing}>
                         <div class="w-10 justify-center items-center">
