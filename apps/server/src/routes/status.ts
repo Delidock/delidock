@@ -80,7 +80,8 @@ statusRouter.post('/activate', passport.authenticate('box', {session: false}), a
                         activated: true,
                         users: {
                             push: user.id
-                        }
+                        },
+                        owner: user.id
                     }
                 })
                 let users : UserUsingBox[] = []
@@ -111,7 +112,8 @@ statusRouter.post('/activate', passport.authenticate('box', {session: false}), a
                     lastPIN: box.lastPIN,
                     lastStatus: box.lastStatus,
                     name: box.name,
-                    users
+                    users,
+                    owner: {name: `${user.firstName} ${user.lastName}`, email: user.email, managing: true}
                 }
 
                 io.of('/ws/users').to(`user:${body.userId}`).emit('boxAddNew', clientBox)

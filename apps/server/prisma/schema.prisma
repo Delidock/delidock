@@ -21,6 +21,7 @@ model User {
   passwordHash String
   allowedBoxes String[] @db.ObjectId @default([])
   managedBoxes String[] @db.ObjectId @default([])
+  ownedBoxes String[] @db.ObjectId @default([])
 }
 model Box {
   id String @id @default(auto()) @map("_id") @db.ObjectId
@@ -33,6 +34,7 @@ model Box {
   lastPIN String
   lastStatus Boolean @default(false)
   users String[] @db.ObjectId @default([])
+  owner String? @db.ObjectId
 }
 model Roles {
   id String @id @map("_id") @db.ObjectId

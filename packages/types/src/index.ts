@@ -55,6 +55,7 @@ export interface User{
     passwordHash: string
     allowedBoxes: string[]
     managedBoxes: string[]
+    ownedBoxes: string[]
 }
 export interface UserUsingBox{
     name: string
@@ -82,6 +83,7 @@ export interface Box {
 export interface BoxClient extends Box {
     managed: boolean
     users: UserUsingBox[]
+    owner: UserUsingBox
 }
 export interface BoxServer extends Box {
     createdAt: Date
@@ -89,6 +91,7 @@ export interface BoxServer extends Box {
     activated: boolean
     pskHash: string
     users: string[]
+    owner: string | null
 }
 
 export enum LivekitDisconnected {

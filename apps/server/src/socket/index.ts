@@ -2,7 +2,8 @@ import { instrument } from "@socket.io/admin-ui";
 import { Server, Socket } from "socket.io";
 import jwt from "jsonwebtoken";
 import { PrismaClient } from "@prisma/client";
-import { BoxClient, BoxJwtPayload, RoleId, UserUsingBox, UserJwtPayload } from "@delidock/types"
+import { BoxJwtPayload, RoleId, UserJwtPayload } from "@delidock/types"
+import { emitBoxes } from "./utils/InitBoxAdd";
 class SocketServer{
     io : Server | null = null
     userSocket : Socket | null = null
@@ -75,8 +76,9 @@ class SocketServer{
                         if (user && user.role === RoleId.User) {
                             const allowedBoxesIds = user.allowedBoxes
                             const managedBoxesIds = user.managedBoxes
+                            const ownedBoxesIds = user.ownedBoxes
     
-                            const allBoxesIds = allowedBoxesIds.concat(managedBoxesIds)
+                            const allBoxesIds = allowedBoxesIds.concat(managedBoxesIds).concat(ownedBoxesIds)
 
                             const allUsersByBoxes = await prisma.user.findMany({where: {
                                 OR: [
@@ -85,6 +87,9 @@ class SocketServer{
                                     },
                                     {
                                         managedBoxes: {hasSome: allBoxesIds}
+                                    },
+                                    {
+                                        ownedBoxes: {hasSome: allBoxesIds}
                                     }
                                 ], 
                                 NOT: {
@@ -99,56 +104,18 @@ class SocketServer{
                             const managedBoxes = await prisma.box.findMany({where: {
                                 id: {in: managedBoxesIds}
                             }})
+
+                            const ownedBoxes = await prisma.box.findMany({where: {
+                                id: {in: ownedBoxesIds}
+                            }})
+
                             socket.emit('initializing')
 
                             socket.join(`user:${user.id}`)
-                            for (const allowedBox of allowedBoxes) {
-                                if (allowedBox.activated && allowedBox.lastPIN){
-
-                                    let users : UserUsingBox[] = []
-                                    for(const userByBox of allUsersByBoxes){
-                                        if (userByBox.managedBoxes.includes(allowedBox.id)) {
-                                            users.push({name: `${userByBox.firstName} ${userByBox.lastName}`, email: userByBox.email, managing: true})
-                                        } else if (userByBox.allowedBoxes.includes(allowedBox.id)) {
-                                            users.push({name: `${userByBox.firstName} ${userByBox.lastName}`, email: userByBox.email, managing: false})
-                                        }
-                                    }
-
-                                    const box : BoxClient = {
-                                        id: allowedBox.id,
-                                        lastPIN: allowedBox.lastPIN,
-                                        name: allowedBox.name,
-                                        lastStatus: allowedBox.lastStatus,
-                                        managed: false,
-                                        users
-                                    }
-                                    socket.join(`box:allowed:${allowedBox.id}`)
-                                    socket.emit('boxAdd', box)
-                                }
-                            }
-                            for (const managedBox of managedBoxes) {
-                                if (managedBox.activated && managedBox.lastPIN){
-
-                                    let users : UserUsingBox[] = []
-                                    for(const userByBox of allUsersByBoxes){
-                                        if (userByBox.managedBoxes.includes(managedBox.id)) {
-                                            users.push({name: `${userByBox.firstName} ${userByBox.lastName}`, email: userByBox.email, managing: true})
-                                        } else if (userByBox.allowedBoxes.includes(managedBox.id)) {
-                                            users.push({name: `${userByBox.firstName} ${userByBox.lastName}`, email: userByBox.email, managing: false})
-                                        }
-                                    }
-                                    const box : BoxClient = {
-                                        id: managedBox.id,
-                                        lastPIN: managedBox.lastPIN,
-                                        name: managedBox.name,
-                                        lastStatus: managedBox.lastStatus,
-                                        managed: true,
-                                        users
-                                    }
-                                    socket.join(`box:managed:${managedBox.id}`)
-                                    socket.emit('boxAdd', box)
-                                }
-                            }
+                            
+                            emitBoxes(allowedBoxes, allUsersByBoxes,false, false, user, socket, 'allowed')
+                            emitBoxes(managedBoxes, allUsersByBoxes,true, false, user, socket, 'managed')
+                            emitBoxes(ownedBoxes, allUsersByBoxes,true, true, user, socket, 'managed')
                             socket.emit('initialized')
 
 
@@ -161,7 +128,7 @@ class SocketServer{
                                     })
 
                                     if (updatedUser) {
-                                        if (updatedUser.managedBoxes.includes(id)) {
+                                        if (updatedUser.managedBoxes.includes(id) || updatedUser.ownedBoxes.includes(id)) {
                                             socket.join(`box:managed:${id}`)
                                         } else if (updatedUser.allowedBoxes.includes(id)) {
                                             socket.join(`box:allowed:${id}`)

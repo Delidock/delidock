@@ -73,7 +73,7 @@ boxRouter.get('/:box/change', passport.authenticate('user', {session: false}), (
 boxRouter.put('/:box/name', passport.authenticate('user', {session: false}), async (req, res) => {
     if (req.user) {
         const user = req.user as User
-        if (user.managedBoxes.includes(req.params.box) && req.body.name) {
+        if ((user.managedBoxes.includes(req.params.box) || user.ownedBoxes.includes(req.params.box)) && req.body.name) {
             try {
                 const box = await prisma.box.update({ 
                     where: { id: req.params.box},
@@ -101,7 +101,7 @@ boxRouter.put('/:box/name', passport.authenticate('user', {session: false}), asy
 boxRouter.post('/:box/invite', passport.authenticate('user', {session: false}), async(req, res) => {
     const user = req.user as User
     const body : BoxInviteBody = req.body
-    if (user && user.managedBoxes.includes(req.params.box)) {
+    if (user && (user.managedBoxes.includes(req.params.box) || user.ownedBoxes.includes(req.params.box))) {
         try {
             const invitee = await prisma.user.update({
                 where: {
@@ -154,6 +154,9 @@ boxRouter.post('/:box/invite', passport.authenticate('user', {session: false}), 
                     {
                         managedBoxes: {has: newBox.id}
                     },
+                    {
+                        ownedBoxes: {has: newBox.id}
+                    }
                 ],
                 NOT: {
                     id: invitee.id
@@ -168,13 +171,22 @@ boxRouter.post('/:box/invite', passport.authenticate('user', {session: false}), 
                 }
             }
 
+            let owner : UserUsingBox
+            if (user.ownedBoxes.includes(newBox.id)) {
+                owner = { name: `${user.firstName} ${user.lastName}`, email: user.email, managing: true}
+            } else{
+                const ownerUser = usersByBox.find((u)=> u.ownedBoxes.includes(newBox.id))
+                owner = { name: `${ownerUser!.firstName} ${ownerUser!.lastName}`, email: ownerUser!.email, managing: true}
+            }
+            
             const clientBox : BoxClient = {
                 managed: false,
                 id: newBox.id,
                 lastPIN: newBox.lastPIN,
                 lastStatus: newBox.lastStatus,
                 name: newBox.name,
-                users
+                users,
+                owner
             }
             
             const usingUser : UserUsingBox = {name: `${invitee.firstName} ${invitee.lastName}`, email: invitee.email, managing: false}
