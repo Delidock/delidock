@@ -67,6 +67,9 @@
         } else {
             errorUnderline = false
         }
+        if (inputDisabled) {
+            boxName = box.name
+        }
     }
     
     let copyText = false
