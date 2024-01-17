@@ -216,8 +216,9 @@
         }
     }
     const currentUser = jwtDecode(delidock.token) as UserJwtPayload
+    
 </script>
-<div class="w-full min-h-[100svh] relative bg-background flex flex-col" class:blur-sm={addUserPopup} class:grayscale-[100%]={addUserPopup}>
+<div class="w-full min-h-[100svh] relative bg-background flex flex-col" class:blur-sm={addUserPopup} class:grayscale-[100%]={addUserPopup} class:!h-screen={addUserPopup} >
     <div class="sticky top-0 flex flex-row items-center justify-between px-4 h-16 bg-background z-20">
         <button on:click|preventDefault={()=>goto("/home")} class=" active:scale-90 transition-transform ease-in-out"><BigCrossIcon/></button>
         <div class="flex flex-row gap-2" class:invalid={nameError} >
@@ -297,7 +298,7 @@
                     {/if}
                 </div>
             </div>
-            <div class="flex flex-col gap-2">
+            <div class="flex flex-col gap-2" class:hidden={addUserPopup}>
                 <div class="w-full h-18 bg-btn_secondary flex flex-row gap-2 solid-shadow rounded-lg p-3" class:border-btn_primary={box.owner.email === currentUser.email} class:border-2={box.owner.email === currentUser.email}>
                     <div class="w-10 justify-center items-center" class:force-svg={box.owner.email === currentUser.email}>
                         <BoxUserIcon/>
