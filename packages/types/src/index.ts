@@ -41,7 +41,10 @@ export interface ActivationBody {
 export interface BoxChangePinBody {
     newPin: string
 }
-export interface BoxInviteBody {
+export interface BoxInviteUserBody {
+    email: string
+}
+export interface BoxRemoveUserBody {
     email: string
 }
 export interface User{
@@ -90,7 +93,6 @@ export interface BoxServer extends Box {
     updatedAt: Date
     activated: boolean
     pskHash: string
-    users: string[]
     owner: string | null
 }
 

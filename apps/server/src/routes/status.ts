@@ -78,9 +78,6 @@ statusRouter.post('/activate', passport.authenticate('box', {session: false}), a
                     },
                     data: {
                         activated: true,
-                        users: {
-                            push: user.id
-                        },
                         owner: user.id
                     }
                 })

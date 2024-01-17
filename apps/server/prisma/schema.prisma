@@ -33,7 +33,6 @@ model Box {
   activated Boolean @default(false)
   lastPIN String
   lastStatus Boolean @default(false)
-  users String[] @db.ObjectId @default([])
   owner String? @db.ObjectId
 }
 model Roles {

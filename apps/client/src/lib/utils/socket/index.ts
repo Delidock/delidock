@@ -33,7 +33,6 @@ export const socketListen = (socket: Socket) => {
         addingStatus.set(AddNewStatus.SUCESS)
         if (!get(boxes).some((b:BoxClient) => b.id === box.id)) {
             boxes.update((b: BoxClient[]) => [...b, box])
-            socket.emit('rejoin', box.id)
         }
         
     })
@@ -41,9 +40,14 @@ export const socketListen = (socket: Socket) => {
     socket.on('boxAddInvite', (box: BoxClient) => {
         if (!get(boxes).some((b:BoxClient) => b.id === box.id)) {
             boxes.update((b: BoxClient[]) => [...b, box])
-            socket.emit('rejoin', box.id)
         }
         
+    })
+
+    socket.on('boxRemove', (boxId: string) =>{
+        if (get(boxes).some((b:BoxClient) => b.id === boxId)) {
+            boxes.update((boxArray: BoxClient[]) => boxArray.filter((box) => box.id !== boxId))
+        }
     })
 
     socket.on('boxAddFailed', ()=> {
@@ -66,13 +70,20 @@ export const socketListen = (socket: Socket) => {
         Update(id, 'lastPIN', pin)
     })
 
-    socket.on('userAdd', (id: string, user: UserUsingBox) => {
+    socket.on('boxUserAdd', (id: string, user: UserUsingBox) => {
         let gotBoxes = get(boxes)
         let boxId = gotBoxes.findIndex((e) => e.id === id)
         if (boxId >= 0) {
             Update(id, 'users', [...gotBoxes[boxId].users, user])
         }
-        
+    })
+
+    socket.on('boxUserRemove', (id: string , userEmail: string) => {
+        let gotBoxes = get(boxes)
+        let boxId = gotBoxes.findIndex((e) => e.id === id)
+        if (boxId >= 0) {
+            Update(id, 'users', gotBoxes[boxId].users.filter(u => u.email !== userEmail))
+        }
     })
 
 }

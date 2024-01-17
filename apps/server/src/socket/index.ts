@@ -117,27 +117,6 @@ class SocketServer{
                             emitBoxes(managedBoxes, allUsersByBoxes,true, false, user, socket, 'managed')
                             emitBoxes(ownedBoxes, allUsersByBoxes,true, true, user, socket, 'managed')
                             socket.emit('initialized')
-
-
-                            socket.on('rejoin',async (id: string)=> {
-                                try {
-                                    const updatedUser = await prisma.user.findUnique({
-                                        where: {
-                                            id: user.id
-                                        }
-                                    })
-
-                                    if (updatedUser) {
-                                        if (updatedUser.managedBoxes.includes(id) || updatedUser.ownedBoxes.includes(id)) {
-                                            socket.join(`box:managed:${id}`)
-                                        } else if (updatedUser.allowedBoxes.includes(id)) {
-                                            socket.join(`box:allowed:${id}`)
-                                        }
-                                    }
-                                } catch (error) {
-                                    
-                                }
-                            })
                         } else {
                             socket.disconnect()  
                         }

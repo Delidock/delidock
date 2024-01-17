@@ -297,7 +297,7 @@
                 </div>
             </div>
             <div class="flex flex-col gap-2">
-                <div class="w-full h-16 bg-btn_secondary flex flex-row gap-2 solid-shadow rounded-lg p-3 border-btn_primary border-2">
+                <div class="w-full h-18 bg-btn_secondary flex flex-row gap-2 solid-shadow rounded-lg p-3 border-btn_primary border-2">
                     <div class="w-10 justify-center items-center">
                         <BoxUserIcon/>
                     </div>
@@ -310,7 +310,7 @@
                     </div>
                 </div>
                 {#each box.users as boxUser}
-                    <div class="w-full h-16 bg-btn_secondary flex flex-row gap-2 solid-shadow rounded-lg p-3" class:border-btn_primary={boxUser.managing} class:border-2={boxUser.managing}>
+                    <div class="w-full h-18 bg-btn_secondary flex flex-row gap-2 solid-shadow rounded-lg p-3" class:border-btn_primary={boxUser.managing} class:border-2={boxUser.managing}>
                         <div class="w-10 justify-center items-center">
                             <BoxUserIcon/>
                         </div>
@@ -320,7 +320,7 @@
                         </div>
                         <div class="w-10 flex justify-center items-center">
                             {#if !boxUser.managing && box.managed}
-                                <button class="transition-transform ease-in-out active:scale-90"><CrossIcon/></button>
+                                <button on:click={() => delidock.removeUser(box.id, boxUser.email)} class="transition-transform ease-in-out active:scale-90"><CrossIcon/></button>
                             {/if}
                         </div>
                     </div>
