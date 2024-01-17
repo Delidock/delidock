@@ -91,10 +91,7 @@ class SocketServer{
                                     {
                                         ownedBoxes: {hasSome: allBoxesIds}
                                     }
-                                ], 
-                                NOT: {
-                                    id: user.id
-                                }
+                                ],
                             }})
 
                             const allowedBoxes = await prisma.box.findMany({where:{

@@ -5,7 +5,7 @@
     import type { BoxClient } from '@delidock/types';
 	import { tick } from 'svelte';
 	import { delidock } from '$lib/utils/delidock.js';
-
+    //import jwt from 'jsonwebtoken'
     import { type Participant, RemoteParticipant, Room, RoomEvent, Track, type RoomOptions } from 'livekit-client';
 	import { boxes } from '$lib/stores/index.js';
 	import { slide } from 'svelte/transition';
@@ -215,6 +215,7 @@
                 break;
         }
     }
+    
 </script>
 <div class="w-full min-h-[100svh] relative bg-background flex flex-col" class:blur-sm={addUserPopup} class:grayscale-[100%]={addUserPopup}>
     <div class="sticky top-0 flex flex-row items-center justify-between px-4 h-16 bg-background z-20">
@@ -297,8 +298,8 @@
                 </div>
             </div>
             <div class="flex flex-col gap-2">
-                <div class="w-full h-18 bg-btn_secondary flex flex-row gap-2 solid-shadow rounded-lg p-3 border-btn_primary border-2">
-                    <div class="w-10 justify-center items-center">
+                <div class="w-full h-18 bg-btn_secondary flex flex-row gap-2 solid-shadow rounded-lg p-3" class:border-btn_primary={box.owner.email === JSON.parse(atob(delidock.token.split('.')[1])).email} class:border-2={box.owner.email === JSON.parse(atob(delidock.token.split('.')[1])).email}>
+                    <div class="w-10 justify-center items-center" class:force-svg={box.owner.email === JSON.parse(atob(delidock.token.split('.')[1])).email}>
                         <BoxUserIcon/>
                     </div>
                     <div class="w-full flex flex-col items-start justify-center">
@@ -310,8 +311,8 @@
                     </div>
                 </div>
                 {#each box.users as boxUser}
-                    <div class="w-full h-18 bg-btn_secondary flex flex-row gap-2 solid-shadow rounded-lg p-3" class:border-btn_primary={boxUser.managing} class:border-2={boxUser.managing}>
-                        <div class="w-10 justify-center items-center">
+                    <div class="w-full h-18 bg-btn_secondary flex flex-row gap-2 solid-shadow rounded-lg p-3" class:border-btn_primary={boxUser.email === JSON.parse(atob(delidock.token.split('.')[1])).email} class:border-2={boxUser.email === JSON.parse(atob(delidock.token.split('.')[1])).email}>
+                        <div class="w-10 justify-center items-center" class:force-svg={boxUser.email === JSON.parse(atob(delidock.token.split('.')[1])).email}>
                             <BoxUserIcon/>
                         </div>
                         <div class="w-full flex flex-col items-start justify-center">
@@ -319,7 +320,8 @@
                             <p class="text-[10px] text-btn_primary">{boxUser.email}</p>
                         </div>
                         <div class="w-10 flex justify-center items-center">
-                            {#if !boxUser.managing && box.managed}
+                            
+                            {#if !boxUser.managing && box.managed && boxUser.email !== JSON.parse(atob(delidock.token.split('.')[1])).email}
                                 <button on:click={() => delidock.removeUser(box.id, boxUser.email)} class="transition-transform ease-in-out active:scale-90"><CrossIcon/></button>
                             {/if}
                         </div>
@@ -351,7 +353,6 @@
     </div>
 {/if}
 <style>
-
     .video-gradient {
         background: radial-gradient(385.51% 138.87% at 100% 96.36%, #1A1249 0%, rgba(36, 64, 118, 0.33) 51.7%, rgba(84, 54, 204, 0.42) 100%);
         box-shadow: 0px 0px 90px 2px rgba(0, 0, 0, 0.98) inset, 0px 4px 4px 0px rgba(0, 0, 0, 0.25), 0px 4px 4px 0px rgba(0, 0, 0, 0.25);

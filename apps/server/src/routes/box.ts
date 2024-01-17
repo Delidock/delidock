@@ -159,9 +159,6 @@ boxRouter.post('/:box/invite', passport.authenticate('user', {session: false}), 
                         ownedBoxes: {has: newBox.id}
                     }
                 ],
-                NOT: {
-                    id: invitee.id
-                }
             }})
 
             for(const userByBox of usersByBox){

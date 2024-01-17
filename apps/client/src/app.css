@@ -32,3 +32,6 @@ html {
 .scan-region-highlight svg{
     stroke: #e7e7f2 !important;
 }
+.force-svg svg path {
+    fill: #A1A1F7 !important;
+}

@@ -14,7 +14,6 @@ export const emitBoxes = (boxesArray : BoxServer[], allUsersByBoxes: User[], man
                 }
             }
             
-            
             let owner : UserUsingBox
             if (iAmOwner) {
                 owner = { name: `${user.firstName} ${user.lastName}`, email: user.email, managing: true}
