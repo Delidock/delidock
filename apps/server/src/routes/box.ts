@@ -176,7 +176,7 @@ boxRouter.post('/:box/invite', passport.authenticate('user', {session: false}), 
             if (user.ownedBoxes.includes(newBox.id)) {
                 owner = { name: `${user.firstName} ${user.lastName}`, email: user.email, managing: true}
             } else{
-                const ownerUser = usersByBox.find((u)=> u.ownedBoxes.includes(newBox.id))
+                const ownerUser = usersByBox.find((u : User)=> u.ownedBoxes.includes(newBox.id))
                 owner = { name: `${ownerUser!.firstName} ${ownerUser!.lastName}`, email: ownerUser!.email, managing: true}
             }
             
@@ -232,7 +232,7 @@ boxRouter.post('/:box/removeuser', passport.authenticate('user', {session: false
                         email: body.email
                     },
                     data: {
-                        allowedBoxes: toBeRemoved.allowedBoxes.filter((boxId) => boxId !== req.params.box)
+                        allowedBoxes: toBeRemoved.allowedBoxes.filter((boxId : string) => boxId !== req.params.box)
                     }
                 })
             } else if (toBeRemoved.managedBoxes.includes(req.params.box) && hasOwned(req.params.box, user)) {
@@ -241,7 +241,7 @@ boxRouter.post('/:box/removeuser', passport.authenticate('user', {session: false
                         email: body.email
                     },
                     data: {
-                        managedBoxes: toBeRemoved.managedBoxes.filter((boxId) => boxId !== req.params.box)
+                        managedBoxes: toBeRemoved.managedBoxes.filter((boxId : string) => boxId !== req.params.box)
                     }
                 })
             } else {
