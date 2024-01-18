@@ -1,6 +1,6 @@
 <script lang="ts">
     import { goto } from '$app/navigation';
-    import { GlobeIcon, GearIcon, EditPenIcon, CheckmarkIcon, CameraIcon, BoxIcon, CrossIcon, ResetIcon, UnlockIcon, BigCrossIcon, PlusIcon, BoxUserIcon, AdminIcon, DemoteIcon, PromoteIcon } from '$lib/assets/icons'
+    import { GlobeIcon, GearIcon, EditPenIcon, CheckmarkIcon, CameraIcon, BoxIcon, CrossIcon, ResetIcon, UnlockIcon, BigCrossIcon, PlusIcon, BoxUserIcon, AdminIcon, DemoteIcon, PromoteIcon, OwnerIcon } from '$lib/assets/icons'
 	import { StatusWidget, BoxButton, PinBox, InputField, Button} from '$lib/components';
     import type { BoxClient, UserJwtPayload } from '@delidock/types';
 	import { tick } from 'svelte';
@@ -308,7 +308,13 @@
                         <BoxUserIcon/>
                     </div>
                     <div class="w-full flex flex-col items-start justify-center">
-                        <p class="text-xs text-text_color flex flex-row gap-2 justify-center items-center">{box.owner.name}<span><div class="h-4 bg-secondary px-2 py-[1px] rounded-lg text-[0.5rem] text-center flex items-center gap-1"><AdminIcon/><p>OWNER</p></div></span></p>
+                        <div class="flex flex-row gap-3">
+                            <p class="text-xs text-text_color flex flex-row gap-2 justify-center items-center">{box.owner.name}</p>
+                            <div class="h-4 bg-secondary px-1 py-[1px] rounded-[4px] text-[0.5rem] text-center flex items-center gap-1">
+                                <OwnerIcon/>
+                                <p class="text-text_color">OWNER</p>
+                            </div>
+                        </div>
                         <p class="text-[10px] text-btn_primary">{box.owner.email}</p>
                     </div>
                     <div class="w-10 flex justify-center items-center">
@@ -321,7 +327,15 @@
                             <BoxUserIcon/>
                         </div>
                         <div class="w-full flex flex-col items-start justify-center">
-                            <p class="text-xs text-text_color flex flex-row gap-2 justify-center items-center">{boxUser.name}{#if boxUser.managing}<span><div class="h-4 bg-secondary px-2 py-[1px] rounded-lg text-[0.5rem] text-center flex items-center gap-1"><AdminIcon/><p>ADMIN</p></div></span>{/if}</p>
+                            <div class="flex flex-row gap-2">
+                                <p class="text-xs text-text_color flex flex-row gap-2 justify-center items-center">{boxUser.name}</p>
+                                {#if boxUser.managing}
+                                    <div class="h-4 bg-secondary px-1 py-[1px] rounded-[4px] text-[0.5rem] text-center flex items-center gap-1">
+                                        <AdminIcon/>
+                                        <p class="text-text_color">ADMIN</p>
+                                    </div>
+                                {/if}
+                            </div>
                             <p class="text-[10px] text-btn_primary">{boxUser.email}</p>
                         </div>
                         <div class="w-10 flex gap-1 justify-center items-center">
