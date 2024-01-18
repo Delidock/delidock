@@ -289,7 +289,7 @@ boxRouter.put('/:box/promote',(req, res, next) => {req.body['boxId'] = req.param
                     allowedBoxes: {has: req.params.box}
                 },
                 data: {
-                    allowedBoxes: toBePromoted.managedBoxes.filter((b) => b !== req.params.box),
+                    allowedBoxes: toBePromoted.managedBoxes.filter((b: string) => b !== req.params.box),
                     managedBoxes: { push: req.params.box }
                 }
             })
@@ -327,7 +327,7 @@ boxRouter.put('/:box/demote',(req, res, next) => {req.body['boxId'] = req.params
                     managedBoxes: {has: req.params.box}
                 },
                 data: {
-                    managedBoxes: toBeDemoted.managedBoxes.filter((b) => b !== req.params.box),
+                    managedBoxes: toBeDemoted.managedBoxes.filter((b: string) => b !== req.params.box),
                     allowedBoxes: { push: req.params.box}
                 }
             })
