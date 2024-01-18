@@ -41,14 +41,16 @@
         boxName = box.name
         inputDisabled = true
     }
-    const regex = /[\p{Letter}\p{Mark}]+/gu
+    const regex = /[\p{Letter}\p{Mark}\p{Number}]+/gu
     const updateBoxName = async () => {
-
         boxName = boxName.match(regex)?.join("") ?? ""
         if (!inputDisabled) {
             if (boxName.length >= 3 && (await delidock.updateName(box,boxName)).status === 200){
                 inputDisabled = true
             } else {
+                if (boxName.length < 1) {
+                    boxName = box.name
+                }
                 nameError = true
                 nameInput.focus()
                 setTimeout(()=>{
@@ -246,7 +248,7 @@
         <button class="active:scale-90 transition-transform ease-in-out"><GearIcon/></button>
     </div>
 
-    <section class="w-full min-h-[calc(100svh-4rem)] bg-secondary rounded-t-[2rem] flex flex-col gap-2 pb-4 px-4 pt-4">
+    <section class="w-full min-h-[calc(100svh-4rem)] bg-secondary rounded-t-[2rem] flex flex-col gap-2 pb-4 px-4 pt-2">
         <div class="w-full justify-end flex">
             <StatusWidget open={box.lastStatus} />
         </div>
