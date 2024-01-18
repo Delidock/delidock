@@ -41,10 +41,7 @@ export interface ActivationBody {
 export interface BoxChangePinBody {
     newPin: string
 }
-export interface BoxInviteUserBody {
-    email: string
-}
-export interface BoxRemoveUserBody {
+export interface BoxUserOperationBody {
     email: string
 }
 export interface User{

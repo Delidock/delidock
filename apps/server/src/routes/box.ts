@@ -2,7 +2,7 @@ import express from "express";
 import { usePassportController } from "../auth";
 import passport from "passport";
 import { io, prisma } from "../index";
-import { BoxAddNewBody, BoxClient, BoxInviteUserBody, BoxJwtPayload, BoxRemoveUserBody, User, UserJwtPayload, UserUsingBox } from "@delidock/types";
+import { BoxAddNewBody, BoxClient, BoxJwtPayload, BoxUserOperationBody, User, UserJwtPayload, UserUsingBox } from "@delidock/types";
 import { createToken } from "../utils/livekit";
 import jwt from "jsonwebtoken";
 
@@ -104,7 +104,7 @@ boxRouter.put('/:box/name', passport.authenticate('user', {session: false}), asy
 
 boxRouter.post('/:box/invite', passport.authenticate('user', {session: false}), async(req, res) => {
     const user = req.user as User
-    const body : BoxInviteUserBody = req.body
+    const body : BoxUserOperationBody = req.body
     if (user && (user.managedBoxes.includes(req.params.box) || user.ownedBoxes.includes(req.params.box))) {
         try {
             const newBox = await prisma.box.findUnique({
@@ -212,7 +212,7 @@ boxRouter.post('/:box/invite', passport.authenticate('user', {session: false}), 
 
 boxRouter.post('/:box/removeuser', passport.authenticate('user', {session: false}), async (req, res) => {
     const user = req.user as User
-    const body : BoxRemoveUserBody = req.body
+    const body : BoxUserOperationBody = req.body
     if (user && (hasManaged(req.params.box, user) || hasOwned(req.params.box, user))) {
         try {
             const toBeRemoved = await prisma.user.findUnique({where: {
@@ -266,6 +266,83 @@ boxRouter.post('/:box/removeuser', passport.authenticate('user', {session: false
         res.status(401).send()
     }
 
+})
+
+boxRouter.put('/:box/promote',(req, res, next) => {req.body['boxId'] = req.params.box; next()} , passport.authenticate('owner', {session: false}), async (req, res) => {
+    const user = req.user as User
+    const body : BoxUserOperationBody = req.body
+    if (user) {
+        try {
+            const toBePromoted = await prisma.user.findUnique({
+                where: {
+                    email: body.email,
+                    allowedBoxes: {has: req.params.box},
+                }
+            })
+            if (!toBePromoted) {
+                res.status(404).send()
+                return
+            }
+            const promotedUser = await prisma.user.update({
+                where: {
+                    email: body.email,
+                    allowedBoxes: {has: req.params.box}
+                },
+                data: {
+                    allowedBoxes: toBePromoted.managedBoxes.filter((b) => b !== req.params.box),
+                    managedBoxes: { push: req.params.box }
+                }
+            })
+            if (!promotedUser) {
+                res.status(404).send()
+            }
+            io.of('/ws/users').to(`box:managed:${req.params.box}`).to(`box:allowed:${req.params.box}`).emit('boxUserPromoted', req.params.box, promotedUser.email)
+            res.status(200).send()
+
+        } catch (error) {
+            res.status(404).send()
+        }
+    } else {
+        res.status(401).send()
+    }
+})
+boxRouter.put('/:box/demote',(req, res, next) => {req.body['boxId'] = req.params.box; next()}, passport.authenticate('owner', {session: false}), async (req, res) => {
+    const user = req.user as User
+    const body : BoxUserOperationBody = req.body
+    if (user) {
+        try {
+            const toBeDemoted = await prisma.user.findUnique({
+                where: {
+                    email: body.email,
+                    managedBoxes: {has: req.params.box}
+                }
+            })
+            if (!toBeDemoted) {
+                res.status(404).send()
+                return
+            }
+            const demotedUser = await prisma.user.update({
+                where: {
+                    email: body.email,
+                    managedBoxes: {has: req.params.box}
+                },
+                data: {
+                    managedBoxes: toBeDemoted.managedBoxes.filter((b) => b !== req.params.box),
+                    allowedBoxes: { push: req.params.box}
+                }
+            })
+            if (!demotedUser) {
+                res.status(404).send()
+            }
+            io.of('/ws/users').to(`box:managed:${req.params.box}`).to(`box:allowed:${req.params.box}`).emit('boxUserDemoted', req.params.box, demotedUser.email)
+            res.status(200).send()
+
+        } catch (error) {
+            res.status(404).send()
+        }
+    } else {
+        res.status(401).send()
+    }
 })
 
 boxRouter.get('/:box/livekit', passport.authenticate('user', {session: false}), (req, res) => {

@@ -1,6 +1,6 @@
 <script lang="ts">
     import { goto } from '$app/navigation';
-    import { GlobeIcon, GearIcon, EditPenIcon, CheckmarkIcon, CameraIcon, BoxIcon, CrossIcon, ResetIcon, UnlockIcon, BigCrossIcon, PlusIcon, BoxUserIcon, AdminIcon } from '$lib/assets/icons'
+    import { GlobeIcon, GearIcon, EditPenIcon, CheckmarkIcon, CameraIcon, BoxIcon, CrossIcon, ResetIcon, UnlockIcon, BigCrossIcon, PlusIcon, BoxUserIcon, AdminIcon, DemoteIcon, PromoteIcon } from '$lib/assets/icons'
 	import { StatusWidget, BoxButton, PinBox, InputField, Button} from '$lib/components';
     import type { BoxClient, UserJwtPayload } from '@delidock/types';
 	import { tick } from 'svelte';
@@ -60,15 +60,17 @@
     }
 
     $: {
-        box = $boxes[data.boxId]
+        if ($boxes[data.boxId]) {
+            box = $boxes[data.boxId]
         
-        if (boxName.length < 3) {
-            errorUnderline = true
-        } else {
-            errorUnderline = false
-        }
-        if (inputDisabled) {
-            boxName = box.name
+            if (boxName.length < 3) {
+                errorUnderline = true
+            } else {
+                errorUnderline = false
+            }
+            if (inputDisabled) {
+                boxName = box.name
+            }
         }
     }
     
@@ -215,6 +217,8 @@
                 break;
         }
     }
+
+    //WIP-INEFFICIENT
     const currentUser = jwtDecode(delidock.token) as UserJwtPayload
     
 </script>
@@ -288,7 +292,7 @@
             </div>
         </div>
         <div class="flex flex-col w-full gap-2 mt-2">
-            <div class="flex flex-row">
+            <div class="flex flex-row h-6">
                 <div class="w-1/2 flex justify-start items-center">
                     <p class="text-xs text-text_color">Users:</p>
                 </div>
@@ -320,9 +324,13 @@
                             <p class="text-xs text-text_color flex flex-row gap-2 justify-center items-center">{boxUser.name}{#if boxUser.managing}<span><div class="h-4 bg-secondary px-2 py-[1px] rounded-lg text-[0.5rem] text-center flex items-center gap-1"><AdminIcon/><p>ADMIN</p></div></span>{/if}</p>
                             <p class="text-[10px] text-btn_primary">{boxUser.email}</p>
                         </div>
-                        <div class="w-10 flex justify-center items-center">
-                            
-                            {#if !boxUser.managing && box.managed && boxUser.email !== currentUser.email}
+                        <div class="w-10 flex gap-1 justify-center items-center">
+                            {#if ((box.owner.email === currentUser.email) && !boxUser.managing)}
+                                    <button on:click={() => delidock.promoteUser(box.id, boxUser.email)} class="transition-transform ease-in-out active:scale-90"><PromoteIcon/></button>
+                                {:else if (box.owner.email === currentUser.email) && boxUser.managing}
+                                <button on:click={() => delidock.demoteUser(box.id, boxUser.email)} class="transition-transform ease-in-out active:scale-90"><DemoteIcon/></button>
+                            {/if}
+                            {#if (box.managed && !boxUser.managing) || (box.owner.email === currentUser.email)}
                                 <button on:click={() => delidock.removeUser(box.id, boxUser.email)} class="transition-transform ease-in-out active:scale-90"><CrossIcon/></button>
                             {/if}
                         </div>
