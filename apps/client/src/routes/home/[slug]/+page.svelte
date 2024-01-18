@@ -287,7 +287,7 @@
                 <BoxButton label="Change PIN" icon={ResetIcon} on:click={()=>changePIN()}/>
             </div>
         </div>
-        <div class="flex flex-col w-full gap-1 mt-2">
+        <div class="flex flex-col w-full gap-2 mt-2">
             <div class="flex flex-row">
                 <div class="w-1/2 flex justify-start items-center">
                     <p class="text-xs text-text_color">Users:</p>
