@@ -1,5 +1,5 @@
 import { goto } from "$app/navigation";
-import { AddNewStatus, addingStatus, boxes } from "$lib/stores";
+import { AddNewStatus, addingStatus, boxes, loggedUser } from "$lib/stores";
 import type { BoxClient, UserJwtPayload, UserUsingBox } from "@delidock/types";
 import type { Socket } from "socket.io-client";
 import { get } from "svelte/store";
@@ -9,8 +9,6 @@ import { Preferences } from "@capacitor/preferences";
 import { jwtDecode } from "jwt-decode";
 import { delidock } from "..";
 import { page } from "$app/stores";
-import {browser} from '$app/environment';
-
 
 export const socketListen = (socket: Socket) => {
     socket.on('disconnect', async (reason) => {
@@ -132,6 +130,11 @@ export const socketListen = (socket: Socket) => {
         if (boxId >= 0) {
             Update(id, 'users', gotBoxes[boxId].users.filter(u => u.email !== userEmail))
         }
+    })
+
+    socket.on('initialized', ()=> {
+        const user : UserJwtPayload =  jwtDecode(delidock.token)
+        loggedUser.set({name: `${user.firstName} ${user.lastName}`, email: user.email})
     })
 
 }

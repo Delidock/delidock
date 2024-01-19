@@ -2,6 +2,11 @@ export enum RoleId {
     User = '000000000000000000000001',
     Box = '000000000000000000000002'
 }
+
+export interface UserPasswordChangeBody {
+    oldPassword: string,
+    newPassword: string
+}
 export interface RegisterUser {
     firstName: string,
     lastName: string,
@@ -56,6 +61,12 @@ export interface User{
     allowedBoxes: string[]
     managedBoxes: string[]
     ownedBoxes: string[]
+}
+
+
+export interface UserClient{
+    name: string,
+    email: string
 }
 export interface UserUsingBox{
     name: string

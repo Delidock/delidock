@@ -45,7 +45,7 @@
                 </div>
                 <div class="w-2/5 flex flex-col gap-6">
                     <div class="h-1/5 w-full flex justify-end items-start">
-                        <button on:click|preventDefault={()=>delidock.logout()} class="active:scale-90 transition-transform ease-in-out"><AccountIcon/></button>
+                        <button on:click|preventDefault={()=>goto("/home/account")} class="active:scale-90 transition-transform ease-in-out"><AccountIcon/></button>
                     </div>
                     <div class="h-4/5 w-full flex justify-end items-center">
                         <img src={Doggo} class="h-20" alt="">

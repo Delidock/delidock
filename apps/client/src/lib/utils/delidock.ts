@@ -1,5 +1,5 @@
 import { goto } from "$app/navigation"
-import type { BoxAddNewBody, BoxClient, BoxUserOperationBody, LoginRequestBody, RegisterConfirmRequestBody, RegisterRequestBody, RegisterUser } from "@delidock/types"
+import type { BoxAddNewBody, BoxClient, BoxUserOperationBody, LoginRequestBody, RegisterConfirmRequestBody, RegisterRequestBody, RegisterUser, UserPasswordChangeBody } from "@delidock/types"
 import { Preferences } from '@capacitor/preferences';
 import Cookies, { type Cookie } from "universal-cookie"
 import { type Socket, io } from 'socket.io-client'
@@ -96,6 +96,19 @@ export class Delidock {
             headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(body)
+        })
+    }
+
+    changePassword = async (oldPassword: string, newPassword: string) => {
+        const body : UserPasswordChangeBody = {oldPassword, newPassword}
+        return await fetch(`${this.api}/user/password`, {
+            method: "put",
+            headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            Authorization: "Bearer "+this.cookies.get('token')
             },
             body: JSON.stringify(body)
         })

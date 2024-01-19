@@ -8,6 +8,7 @@
     export let icon : ComponentType = EmailIcon
     export let green : boolean = false
     export let id : string = ""
+    export let succesMessage : string = ""
 
 
     let formInvalid : boolean
@@ -19,6 +20,9 @@
         } else {
             formInvalid = false
             title = label+":"
+        }
+        if (succesMessage) {
+            title = succesMessage
         }
     }
 
@@ -36,12 +40,13 @@
     }
     const onInput = () => {
         error = null
+        succesMessage = ""
     }
     
 </script>
 <div id={id} class="shadow">
-    <p class:!text-red={formInvalid} class="text-xs text-text_color mb-1">{title}</p>
-    <div class:!border-red={formInvalid} class:!border-green={green} class="transition-colors ease-in-out w-full h-16 bg-secondary border-2 border-btn_secondary rounded-lg text-text_color text-base flex-row flex px-3 items-center gap-3">
+    <p class:!text-red={formInvalid} class:!text-green={succesMessage} class="text-xs text-text_color mb-1">{title}</p>
+    <div class:!border-red={formInvalid} class:!border-green={green || succesMessage} class="transition-colors ease-in-out w-full h-16 bg-secondary border-2 border-btn_secondary rounded-lg text-text_color text-base flex-row flex px-3 items-center gap-3">
         <svelte:component this={icon}/>
         <input {...{type}} class="w-full h-full bg-secondary outline-none" name={label} bind:value={value} on:invalid|preventDefault={ ()=> {error = displayError()}} on:input={()=> onInput()} required>
     </div>
