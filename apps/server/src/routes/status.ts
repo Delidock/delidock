@@ -190,6 +190,8 @@ statusRouter.put('/changed', passport.authenticate('box', {session: false}), asy
             io.of('/ws/users').to(`box:allowed:${box.id}`).to(`box:managed:${box.id}`).emit("boxPinChanged",box.id, body.newPin)
             res.status(200).send()
         } catch (error) {
+            console.log(error);
+            
             res.status(404).send()
         }
     } else {
