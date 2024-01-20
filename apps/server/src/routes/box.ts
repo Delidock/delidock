@@ -17,7 +17,7 @@ const hasOwned = (boxId: string, user: User) => user.ownedBoxes.includes(boxId)
 boxRouter.post('/activate', passport.authenticate('user', {session: false}), async (req, res) => {
     const body : BoxAddNewBody = req.body
     if (req.user && body) {
-        const user = req.body as User
+        const user = req.user as User
         try {
             const newBox = await prisma.box.findUnique({
                 where: {
