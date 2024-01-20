@@ -182,8 +182,11 @@ statusRouter.put('/changed', passport.authenticate('box', {session: false}), asy
         const box = req.user as BoxServer
         try {
             const updated = await updatePin(box.id, body.newPin)
-            if (!updated)
+            if (!updated) {
                 res.status(404).send()
+                return
+            }
+                
             io.of('/ws/users').to(`box:allowed:${box.id}`).to(`box:managed:${box.id}`).emit("boxPinChanged",box.id, body.newPin)
             res.status(200).send()
         } catch (error) {

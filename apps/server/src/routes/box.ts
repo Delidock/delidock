@@ -2,7 +2,7 @@ import express from "express";
 import { usePassportController } from "../auth";
 import passport from "passport";
 import { io, prisma } from "../index";
-import { BoxAddNewBody, BoxClient, BoxJwtPayload, BoxUserOperationBody, User, UserJwtPayload, UserUsingBox } from "@delidock/types";
+import { BoxAddNewBody, BoxClient, BoxUserOperationBody, User, UserJwtPayload, UserUsingBox } from "@delidock/types";
 import { createToken } from "../utils/livekit";
 import jwt from "jsonwebtoken";
 
@@ -42,11 +42,11 @@ boxRouter.get('/:box/unlock', passport.authenticate('user', {session: false}), (
     
     if (req.user) {
         const user = req.user as User
-        const boxes = user.allowedBoxes.concat(user.managedBoxes)
+        const boxes = user.allowedBoxes.concat(user.managedBoxes).concat(user.ownedBoxes)
         if (boxes.includes(req.params.box)) {
             
             io.of('/ws/boxes').to(`box:${req.params.box}`).emit('unlock')
-            res.send().status(200)
+            res.status(200).send()
         } else {
             res.status(401).send()
         }
@@ -60,11 +60,11 @@ boxRouter.get('/:box/change', passport.authenticate('user', {session: false}), (
 
     if (req.user) {
         const user = req.user as User
-        const boxes = user.allowedBoxes.concat(user.managedBoxes)
+        const boxes = user.allowedBoxes.concat(user.managedBoxes).concat(user.ownedBoxes)
         if (boxes.includes(req.params.box)) {
 
             io.of('/ws/boxes').to(`box:${req.params.box}`).emit('change')
-            res.send().status(200)
+            res.status(200).send()
         } else {
             res.status(401).send()
         }
