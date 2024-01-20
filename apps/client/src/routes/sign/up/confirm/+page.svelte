@@ -5,7 +5,7 @@
 	import { registerUser } from "$lib/stores";
 	import { delidock } from "$lib/utils";
 	import { onMount } from "svelte";
-
+    
     let confirmedPass: string
     let confirmError : string | null
 

@@ -1,6 +1,7 @@
 /// <reference types="@capacitor/splash-screen" />
 import { CapacitorConfig } from '@capacitor/cli';
 import { KeyboardResize, KeyboardStyle } from '@capacitor/keyboard';
+import { App as CapacitorApp } from '@capacitor/app'
 const config: CapacitorConfig = {
   appId: 'com.delidock.app',
   appName: 'DelidockApp',
