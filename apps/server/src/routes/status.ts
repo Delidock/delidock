@@ -134,7 +134,7 @@ statusRouter.post('/activate', passport.authenticate('box', {session: false}), a
 statusRouter.get('/getLivekit', passport.authenticate('box', {session: false}), (req, res) => {
     if (req.user && process.env.LIVEKIT_API_KEY && process.env.LIVEKIT_SECRET) {
         const box = req.user as BoxServer
-        res.send(createToken(box.id, box.id, process.env.LIVEKIT_API_KEY, process.env.LIVEKIT_SECRET))
+        res.send(createToken(box.id, box.id, process.env.LIVEKIT_API_KEY, process.env.LIVEKIT_SECRET, true))
     } else {
         res.status(401).send()
     }

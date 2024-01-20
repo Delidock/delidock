@@ -1,10 +1,15 @@
 import { AccessToken } from "livekit-server-sdk";
 
-export const createToken = (room: string, user:string, apiKey: string, secret: string) => {
+export const createToken = (room: string, user:string, apiKey: string, secret: string, box: boolean = false) => {
 
     const roomName = `room:${room}`;
 
-    const participantName = user;
+    let participantName = user;
+    if (box) {
+        participantName = `box:${user}`;
+    }
+    participantName = user
+
 
     const at = new AccessToken(apiKey, secret, {
         identity: participantName,
