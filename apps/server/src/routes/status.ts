@@ -63,10 +63,11 @@ statusRouter.post('/activate', passport.authenticate('box', {session: false}), a
         try {
             const user = await prisma.user.update({
                 where: {
-                    id: body.userId
+                    id: body.userId,
+                    NOT: { ownedBoxes: {has: box.id}}
                 },
                 data: {
-                    managedBoxes: {
+                    ownedBoxes: {
                         push: box.id
                     }
                 }
@@ -120,9 +121,11 @@ statusRouter.post('/activate', passport.authenticate('box', {session: false}), a
                 res.status(200).send()
             }
             else {
+                console.log("ERROR #1");
                 res.status(404).send()
             }
         } catch (error) {
+            console.log(error);
             res.status(404).send()
         }
     } else {
