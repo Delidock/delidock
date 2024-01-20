@@ -140,7 +140,7 @@ statusRouter.get('/getLivekit', passport.authenticate('box', {session: false}), 
     }
 })
 
-statusRouter.get('/unlocked', passport.authenticate('box', {session: true}), (req, res) => {
+statusRouter.get('/unlocked', passport.authenticate('box', {session: false}), (req, res) => {
     if (req.user) {
         const box = req.user as BoxServer
         try {
@@ -156,7 +156,7 @@ statusRouter.get('/unlocked', passport.authenticate('box', {session: true}), (re
     }
 })
 
-statusRouter.get('/closed', passport.authenticate('box', {session: true}), async (req, res) => {
+statusRouter.get('/closed', passport.authenticate('box', {session: false}), async (req, res) => {
     if (req.user) {
         const box = req.user as BoxServer
         try {
