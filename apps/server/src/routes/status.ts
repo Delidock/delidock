@@ -121,11 +121,9 @@ statusRouter.post('/activate', passport.authenticate('box', {session: false}), a
                 res.status(200).send()
             }
             else {
-                console.log("ERROR #1");
                 res.status(404).send()
             }
         } catch (error) {
-            console.log(error);
             res.status(404).send()
         }
     } else {
@@ -187,7 +185,7 @@ statusRouter.put('/changed', passport.authenticate('box', {session: false}), asy
                 return
             }
                 
-            io.of('/ws/users').to(`box:allowed:${box.id}`).to(`box:managed:${box.id}`).emit("boxPinChanged",box.id, body.newPin)
+            io.of('/ws/users').to(`box:allowed:${box.id}`).to(`box:managed:${box.id}`).emit("boxChanged",box.id, body.newPin)
             res.status(200).send()
         } catch (error) {
             console.log(error);
