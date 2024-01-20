@@ -7,8 +7,10 @@ export const createToken = (room: string, user:string, apiKey: string, secret: s
     let participantName = user;
     if (box) {
         participantName = `box:${user}`;
+    } else {
+        participantName = user
     }
-    participantName = user
+    
 
 
     const at = new AccessToken(apiKey, secret, {
