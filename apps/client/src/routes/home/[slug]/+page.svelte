@@ -135,8 +135,15 @@
             .on(RoomEvent.TrackUnsubscribed, (_, pub, participant) => {
                 renderParticipant(participant);
             })
-            .on(RoomEvent.Connected, () => {                
+            .on(RoomEvent.Connected, () => {  
                 livekitState = LivekitState.CONNECTED
+                room.participants.forEach((p: RemoteParticipant)=> {
+                    if (p.identity === `box:${box.id}`) {
+                        renderParticipant(p)
+                    }
+                })
+                              
+                
             })
             .on(RoomEvent.TrackMuted, (pub, participant) => {
                 renderParticipant(participant);
@@ -164,11 +171,14 @@
         renderParticipant(participant, true)
     }
     const renderParticipant = (participant: Participant, remove: boolean = false) => {
+        console.log(participant.identity);
+        
         if ((!remove && participant instanceof RemoteParticipant) && participant.identity === `box:${box.id}`) {
 
             livekitState = LivekitState.BOXCONNECTED
             const cameraPub = participant.getTrack(Track.Source.Camera)
             if (cameraPub?.videoTrack) {
+                
                 cameraPub.videoTrack?.attach(boxVideo)
 
                 if (cameraPub.videoTrack.isMuted) {
@@ -180,8 +190,6 @@
                 livekitState = LivekitState.BOXCONNECTED
             }
         } else if (remove && participant instanceof RemoteParticipant) {
-            
-            
             livekitState = LivekitState.CONNECTED
         }
     }
