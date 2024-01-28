@@ -29,6 +29,7 @@ export const emitBoxes = (boxesArray : BoxServer[], allUsersByBoxes: User[], man
                 lastStatus: box.lastStatus,
                 managed: managed,
                 users,
+                offline: box.offline,
                 owner
             }
             socket.join(`box:${socketRoomSubId}:${box.id}`)

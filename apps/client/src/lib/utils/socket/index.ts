@@ -25,6 +25,14 @@ export const socketListen = (socket: Socket) => {
         }
     })
 
+    socket.on('boxOnline', (boxId:string) => {
+        Update(boxId, 'offline', false)
+    })
+
+    socket.on('boxOffline', (boxId:string) => {
+        Update(boxId, 'offline', true)
+    })
+
     socket.on('boxAdd', (box: BoxClient) => {
         if (!get(boxes).some((b:BoxClient) => b.id === box.id)) {
             boxes.update((b: BoxClient[]) => [...b, box])

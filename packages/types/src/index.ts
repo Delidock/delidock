@@ -89,6 +89,7 @@ export interface Box {
     id: string
     lastPIN: string
     lastStatus: boolean 
+    offline: boolean
     name: string
 }
 export interface BoxClient extends Box {

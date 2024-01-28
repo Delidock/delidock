@@ -14,17 +14,21 @@ const hasManaged = (boxId: string, user: User) => user.managedBoxes.includes(box
 const hasAllowed = (boxId: string, user: User) => user.allowedBoxes.includes(boxId)
 const hasOwned = (boxId: string, user: User) => user.ownedBoxes.includes(boxId)
 
+const getBox = async (boxId: string) => {
+    return await prisma.box.findUnique({
+        where: {
+            id: boxId
+        }
+    })
+}
+
 boxRouter.post('/activate', passport.authenticate('user', {session: false}), async (req, res) => {
     const body : BoxAddNewBody = req.body
     if (req.user && body) {
         const user = req.user as User
         try {
-            const newBox = await prisma.box.findUnique({
-                where: {
-                    id: body.id
-                }
-            })
-            if (newBox && !newBox.activated) {
+            const newBox = await getBox(body.id)
+            if (newBox && !newBox.activated && !newBox.offline) {
                 io.of('/ws/boxes').to(`box:${newBox.id}`).emit('activate', user.id, body.generatedToken)
                 res.status(200).send()
             } else {
@@ -38,15 +42,24 @@ boxRouter.post('/activate', passport.authenticate('user', {session: false}), asy
     }
 })
 
-boxRouter.get('/:box/unlock', passport.authenticate('user', {session: false}), (req, res) => {
+boxRouter.get('/:box/unlock', passport.authenticate('user', {session: false}), async (req, res) => {
     
     if (req.user) {
         const user = req.user as User
         const boxes = user.allowedBoxes.concat(user.managedBoxes).concat(user.ownedBoxes)
         if (boxes.includes(req.params.box)) {
-            
-            io.of('/ws/boxes').to(`box:${req.params.box}`).emit('unlock')
-            res.status(200).send()
+            try {
+                const box = await getBox(req.params.box)
+                if (box && box.activated && !box.offline) {
+                    io.of('/ws/boxes').to(`box:${req.params.box}`).emit('unlock')
+                    res.status(200).send()
+                } else {
+                    res.status(404).send()
+                }
+                
+            } catch (error) {
+                res.status(404).send()
+            }
         } else {
             res.status(401).send()
         }
@@ -56,15 +69,24 @@ boxRouter.get('/:box/unlock', passport.authenticate('user', {session: false}), (
 
 })
 
-boxRouter.get('/:box/change', passport.authenticate('user', {session: false}), (req, res) => {
+boxRouter.get('/:box/change', passport.authenticate('user', {session: false}), async (req, res) => {
 
     if (req.user) {
         const user = req.user as User
         const boxes = user.allowedBoxes.concat(user.managedBoxes).concat(user.ownedBoxes)
         if (boxes.includes(req.params.box)) {
-
-            io.of('/ws/boxes').to(`box:${req.params.box}`).emit('change')
-            res.status(200).send()
+            try {
+                const box = await getBox(req.params.box)
+                if (box && box.activated && !box.offline) {
+                    io.of('/ws/boxes').to(`box:${req.params.box}`).emit('change')
+                    res.status(200).send()
+                } else {
+                    res.status(404).send()
+                }
+                
+            } catch (error) {
+                res.status(404).send()
+            }
         } else {
             res.status(401).send()
         }
@@ -183,6 +205,7 @@ boxRouter.post('/:box/invite', passport.authenticate('user', {session: false}), 
                 lastPIN: newBox.lastPIN,
                 lastStatus: newBox.lastStatus,
                 name: newBox.name,
+                offline: newBox.offline,
                 users,
                 owner
             }
@@ -345,10 +368,19 @@ boxRouter.put('/:box/demote',(req, res, next) => {req.body['boxId'] = req.params
     }
 })
 
-boxRouter.get('/:box/livekit', passport.authenticate('user', {session: false}), (req, res) => {
+boxRouter.get('/:box/livekit', passport.authenticate('user', {session: false}), async (req, res) => {
     if (req.user && process.env.LIVEKIT_API_KEY && process.env.LIVEKIT_SECRET) {
         const user = req.user as User
-        res.send(createToken(req.params.box, user.id, process.env.LIVEKIT_API_KEY, process.env.LIVEKIT_SECRET))
+        try {
+            const box = await getBox(req.params.box)
+            if (box && box.activated && !box.offline) {
+                res.send(createToken(req.params.box, user.id, process.env.LIVEKIT_API_KEY, process.env.LIVEKIT_SECRET))
+            } else {
+                res.status(404).send()
+            }
+        } catch (error) {
+            res.status(404).send()
+        }
     } else {
         res.status(401).send()
     }

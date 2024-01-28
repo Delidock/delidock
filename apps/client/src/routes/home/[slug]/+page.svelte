@@ -80,8 +80,16 @@
 
 
     const changePIN = () => {
-        copyText = false
-        delidock.changePin(box)
+        if (!box.offline) {
+            copyText = false
+            delidock.changePin(box)
+        }
+    }
+    
+    const unlockBox = () =>{
+        if (!box.offline) {
+            delidock.unlock(box)
+        }
     }
 
     //LIVEKIT
@@ -90,6 +98,9 @@
     let currentRoom: Room | undefined;
 
     const tryConnect = async () => {
+        if (box.offline) {
+            return
+        }
         livekitState = LivekitState.VIEW
         
         let token = await delidock.getLivekitToken(box.id)
@@ -257,8 +268,11 @@
     </div>
 
     <section class="w-full min-h-[calc(100svh-4rem)] bg-secondary rounded-t-[2rem] flex flex-col gap-2 pb-4 px-4 pt-2">
-        <div class="w-full justify-end flex">
-            <StatusWidget open={box.lastStatus} />
+        <div class="w-full justify-end flex gap-1">
+            <StatusWidget open={box.lastStatus} offline={box.offline}/>
+            {#if box.offline}
+                <StatusWidget open={box.lastStatus} offline={false}/>
+            {/if}
         </div>
 
         <div class="transition-all ease-in-out text-text_color w-full aspect-[4/3] rounded-lg border border-outline justify-center items-center flex flex-row relative overflow-hidden" class:video-inactive={(livekitState === LivekitState.DISCONNECTED)} class:video-gradient={(livekitState > LivekitState.DISCONNECTED)} >
@@ -287,7 +301,7 @@
                         </div>
                     {/if}
                 {:else}
-                <div class="h-16 w-1/3"><BoxButton label="View" icon={CameraIcon} on:click={()=>tryConnect()}/></div>
+                <div class="h-16 w-1/3"><BoxButton offline={box.offline} label="View" icon={CameraIcon} on:click={()=>tryConnect()}/></div>
             {/if}
             
         </div>
@@ -297,8 +311,8 @@
                 <PinBox pin={box.lastPIN} copyText={copyText}/>
             </div>
             <div class="w-full flex flex-row gap-1 h-16">
-                <BoxButton label="Unlock" icon={UnlockIcon} on:click={()=>delidock.unlock(box)}/>
-                <BoxButton label="Change PIN" icon={ResetIcon} on:click={()=>changePIN()}/>
+                <BoxButton offline={box.offline} label="Unlock" icon={UnlockIcon} on:click={()=>unlockBox()}/>
+                <BoxButton offline={box.offline} label="Change PIN" icon={ResetIcon} on:click={()=>changePIN()}/>
             </div>
         </div>
         <div class="flex flex-col w-full gap-2 mt-2">

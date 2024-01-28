@@ -110,6 +110,7 @@ statusRouter.post('/activate', passport.authenticate('box', {session: false}), a
                     lastPIN: box.lastPIN,
                     lastStatus: box.lastStatus,
                     name: box.name,
+                    offline: box.offline,
                     users,
                     owner: {name: `${user.firstName} ${user.lastName}`, email: user.email, managing: true}
                 }

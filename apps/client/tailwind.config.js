@@ -12,6 +12,7 @@ export default {
         btn_primary: '#A1A1F7',
         btn_secondary: '#1A1A3E',
         btn_pressed: '#232340',
+        btn_unclickable: '#13132A',
         red: '#CF3A4B',
         green: '#56E08D'
   

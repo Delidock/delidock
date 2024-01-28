@@ -11,8 +11,15 @@
     let copyText : boolean = false
     
     const changePIN = () => {
-        copyText = false
-        delidock.changePin(box)
+        if (!box.offline) {
+            copyText = false
+            delidock.changePin(box)
+        }
+    }
+    const unlockBox = () => {
+        if (!box.offline) {
+            delidock.unlock(box)
+        }
     }
     
 </script>
@@ -20,7 +27,7 @@
     {#if !detailed}
         <div class="flex flex-row justify-between items-center h-[10%]">
             <h4>{box.name}</h4>
-            <StatusWidget open={box.lastStatus}/>
+            <StatusWidget open={box.lastStatus} offline={box.offline}/>
         </div>
     {/if}
     <div class="h-[55%]">
@@ -28,8 +35,8 @@
     </div>
     <div class="flex flex-row gap-2 h-[35%]">
         <div class="flex flex-row gap-2 w-full">
-            <BoxButton on:click={()=>delidock.unlock(box)} label="Unlock" icon={UnlockIcon}/>
-            <BoxButton on:click={()=>changePIN()} label="Change pin" icon={ResetIcon}/>
+            <BoxButton offline={box.offline} on:click={()=>unlockBox()} label="Unlock" icon={UnlockIcon}/>
+            <BoxButton offline={box.offline} on:click={()=>changePIN()} label="Change pin" icon={ResetIcon}/>
         </div>
         {#if !detailed}
             <div class="aspect-square h-full">

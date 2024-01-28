@@ -36,15 +36,19 @@ class SocketServer{
             if (boxPayload && (boxPayload.role === RoleId.Box)) {
                 socket.join(`box:${boxPayload.id}`)
                 try {
-                    const box = await prisma.box.findUnique({
+                    const box = await prisma.box.update({
                         where: {
                             id: boxPayload.id
+                        },
+                        data: {
+                            offline: false
                         }
                     })
                     if (box) {
                         socket.emit('initializing')
                         if (box.activated) {
                             socket.emit('initialized', {pin: box.lastPIN})
+                            io.of('/ws/users').to(`box:allowed:${box.id}`).to(`box:managed:${box.id}`).emit('boxOnline', box.id)
                         } else if (!box.activated) {
                             socket.emit('activation')
                         }
@@ -114,6 +118,8 @@ class SocketServer{
                             emitBoxes(managedBoxes, allUsersByBoxes,true, false, user, socket, 'managed')
                             emitBoxes(ownedBoxes, allUsersByBoxes,true, true, user, socket, 'managed')
                             socket.emit('initialized')
+
+
                         } else {
                             socket.disconnect()  
                         }
