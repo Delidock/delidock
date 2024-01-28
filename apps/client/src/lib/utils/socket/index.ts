@@ -11,6 +11,9 @@ import { delidock } from "..";
 import { page } from "$app/stores";
 
 export const socketListen = (socket: Socket) => {
+
+    const currentUser = get(loggedUser)
+
     socket.on('disconnect', async (reason) => {
         const cookies = new Cookies()
         switch (reason) {
@@ -57,7 +60,6 @@ export const socketListen = (socket: Socket) => {
     socket.on('boxRemove',async  (boxId: string) =>{
         if (get(boxes).some((b:BoxClient) => b.id === boxId)) {
             const currentPage = get(page)
-            console.log(currentPage.url.pathname);
             
             if (currentPage.url.pathname === `/home/${boxId}`) {
                 goto('/home', {replaceState: true})
@@ -81,7 +83,6 @@ export const socketListen = (socket: Socket) => {
         Update(id, 'lastStatus', false)
     })
     socket.on('boxNameChanged', (id:string, name: string) => {
-        //addingStatus.set(AddNewStatus.SUCESS)
         Update(id, 'name', name)
     })
 
@@ -106,8 +107,7 @@ export const socketListen = (socket: Socket) => {
                 gotBoxes[boxId].users[userId]['managing'] = true
                 boxes.set(gotBoxes)
 
-                //WIP-INEFFICIENT
-                if (userEmail === (jwtDecode(delidock.token) as UserJwtPayload).email) {
+                if (currentUser && (userEmail === currentUser.email)) {
                     Update(id, 'managed', true)
                 }
             }
@@ -124,9 +124,8 @@ export const socketListen = (socket: Socket) => {
                 gotBoxes[boxId].users[userId]['managing'] = false
                 boxes.set(gotBoxes)
 
-                //WIP-INEFFICIENT
-                if (userEmail === (jwtDecode(delidock.token) as UserJwtPayload).email) {
-                    Update(id, 'managed', false)
+                if (currentUser && (userEmail === currentUser.email)) {
+                    Update(id, 'managed', true)
                 }
             }
         }
