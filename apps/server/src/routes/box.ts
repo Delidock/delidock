@@ -4,7 +4,6 @@ import passport from "passport";
 import { io, prisma } from "../index";
 import { BoxAddNewBody, BoxClient, BoxUserOperationBody, User, UserJwtPayload, UserUsingBox } from "@delidock/types";
 import { createToken } from "../utils/livekit";
-import jwt from "jsonwebtoken";
 
 export const boxRouter =  express.Router()
 
@@ -108,7 +107,7 @@ boxRouter.put('/:box/name', passport.authenticate('user', {session: false}), asy
                     }
                 })
                 if (box) {
-                    io.of('/ws/users').to(`box:allowed:${req.params.box}`).to(`box:managed:${req.params.box}`).emit("boxNameChanged", req.params.box, req.body.name)
+                    io.of('/ws/users').to([`box:allowed:${req.params.box}`,`box:managed:${req.params.box}`]).emit("boxNameChanged", req.params.box, req.body.name)
                     res.send().status(200)
                 } else {
                     res.send().status(404)
@@ -212,14 +211,8 @@ boxRouter.post('/:box/invite', passport.authenticate('user', {session: false}), 
             
             const usingUser : UserUsingBox = {name: `${invitee.firstName} ${invitee.lastName}`, email: invitee.email, managing: false}
             io.of('/ws/users').to(`user:${invitee.id}`).emit('boxAddInvite', clientBox)
-            io.of('/ws/users').to(`box:managed:${newBox.id}`).to(`box:allowed:${newBox.id}`).emit('boxUserAdd', newBox.id, usingUser)
-            
-            //WIP-INEFFICIENT
-            io.of('/ws/users').sockets.forEach(s => {
-                if ((jwt.decode(s.handshake.auth.token, { json: true}) as UserJwtPayload).email === invitee.email) {
-                    s.join(`box:allowed:${req.params.box}`)
-                }
-            })
+            io.of('/ws/users').to([`box:managed:${newBox.id}`,`box:allowed:${newBox.id}`]).emit('boxUserAdd', newBox.id, usingUser)
+            io.of('/ws/users').in(`user:${invitee.id}`).socketsJoin(`box:allowed:${req.params.box}`)
             res.status(200).send()
 
         } catch (error : any) {
@@ -270,16 +263,8 @@ boxRouter.post('/:box/removeuser', passport.authenticate('user', {session: false
             }
 
             io.of('/ws/users').to(`user:${toBeRemoved.id}`).emit('boxRemove', req.params.box)
-            
-            //WIP-INEFFICIENT
-            io.of('/ws/users').sockets.forEach(s => {
-                if ((jwt.decode(s.handshake.auth.token, { json: true}) as UserJwtPayload).email === toBeRemoved.email) {
-                    s.leave(`box:allowed:${req.params.box}`)
-                    s.leave(`box:managed:${req.params.box}`)
-                }
-            })
-
-            io.of('/ws/users').to(`box:managed:${req.params.box}`).to(`box:allowed:${req.params.box}`).emit('boxUserRemove', req.params.box, toBeRemoved.email)
+            io.of('/ws/users').in(`user:${toBeRemoved.id}`).socketsLeave([`box:allowed:${req.params.box}`, `box:managed:${req.params.box}`])
+            io.of('/ws/users').to([`box:managed:${req.params.box}`, `box:allowed:${req.params.box}`]).emit('boxUserRemove', req.params.box, toBeRemoved.email)
             
             res.status(200).send()
         } catch (error) {
@@ -319,7 +304,7 @@ boxRouter.put('/:box/promote',(req, res, next) => {req.body['boxId'] = req.param
             if (!promotedUser) {
                 res.status(404).send()
             }
-            io.of('/ws/users').to(`box:managed:${req.params.box}`).to(`box:allowed:${req.params.box}`).emit('boxUserPromoted', req.params.box, promotedUser.email)
+            io.of('/ws/users').to([`box:managed:${req.params.box}`, `box:allowed:${req.params.box}`]).emit('boxUserPromoted', req.params.box, promotedUser.email)
             res.status(200).send()
 
         } catch (error) {
@@ -357,7 +342,7 @@ boxRouter.put('/:box/demote',(req, res, next) => {req.body['boxId'] = req.params
             if (!demotedUser) {
                 res.status(404).send()
             }
-            io.of('/ws/users').to(`box:managed:${req.params.box}`).to(`box:allowed:${req.params.box}`).emit('boxUserDemoted', req.params.box, demotedUser.email)
+            io.of('/ws/users').to([`box:managed:${req.params.box}`,`box:allowed:${req.params.box}`]).emit('boxUserDemoted', req.params.box, demotedUser.email)
             res.status(200).send()
 
         } catch (error) {
