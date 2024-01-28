@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken";
 import { PrismaClient } from "@prisma/client";
 import { BoxJwtPayload, RoleId, UserJwtPayload } from "@delidock/types"
 import { emitBoxes } from "./utils/InitBoxAdd";
+import { boxSocketListen } from "./socket-listeners";
 class SocketServer{
     io : Server | null = null
     userSocket : Socket | null = null
@@ -28,6 +29,7 @@ class SocketServer{
         
         io.of("/ws/boxes").on("connection", async (socket : Socket) => {
             this.boxSocket = socket
+            
             if (!jwt.verify(socket.handshake.auth.token, process.env.DELIDOCK_API_SECRET ?? "")   ) {
                 socket.disconnect()    
             }
@@ -45,6 +47,7 @@ class SocketServer{
                         }
                     })
                     if (box) {
+                        boxSocketListen(socket, io, box.id)
                         socket.emit('initializing')
                         if (box.activated) {
                             socket.emit('initialized', {pin: box.lastPIN})
