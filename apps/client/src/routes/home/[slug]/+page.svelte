@@ -142,7 +142,7 @@
                 renderParticipant(participant);
                 
             })
-            .on(RoomEvent.TrackUnsubscribed, (_, pub, participant) => {
+            .on(RoomEvent.TrackUnsubscribed, (_, pub, participant) => {                
                 renderParticipant(participant);
             })
             .on(RoomEvent.Connected, () => {  
@@ -181,10 +181,8 @@
         renderParticipant(participant, true)
     }
     const renderParticipant = (participant: Participant, remove: boolean = false) => {
-        console.log(participant.identity);
         
         if ((!remove && participant instanceof RemoteParticipant) && participant.identity === `box:${box.id}`) {
-
             livekitState = LivekitState.BOXCONNECTED
             const cameraPub = participant.getTrack(Track.Source.Camera)
             if (cameraPub?.videoTrack) {
@@ -192,14 +190,16 @@
                 cameraPub.videoTrack?.attach(boxVideo)
 
                 if (cameraPub.videoTrack.isMuted) {
+                    
                     livekitState = LivekitState.BOXCONNECTED
                 } else {
                     livekitState = LivekitState.BOXVIDEO
                 }
             } else {
+                
                 livekitState = LivekitState.BOXCONNECTED
             }
-        } else if (remove && participant instanceof RemoteParticipant) {
+        } else if (remove && participant instanceof RemoteParticipant && participant.identity === `box:${box.id}`) {
             livekitState = LivekitState.CONNECTED
         }
     }
@@ -237,6 +237,10 @@
                 break;
         }
     }  
+
+    console.log($loggedUser);
+   
+    
 </script>
 <div class="w-full min-h-[100svh] relative bg-background flex flex-col" class:blur-sm={addUserPopup} class:grayscale-[100%]={addUserPopup} class:!h-screen={addUserPopup} >
     <div class="sticky top-0 flex flex-row items-center justify-between px-4 h-16 bg-background z-20">

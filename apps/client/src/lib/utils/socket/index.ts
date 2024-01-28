@@ -12,7 +12,7 @@ import { page } from "$app/stores";
 
 export const socketListen = (socket: Socket) => {
 
-    const currentUser = get(loggedUser)
+    
 
     socket.on('disconnect', async (reason) => {
         const cookies = new Cookies()
@@ -107,6 +107,9 @@ export const socketListen = (socket: Socket) => {
                 gotBoxes[boxId].users[userId]['managing'] = true
                 boxes.set(gotBoxes)
 
+                const currentUser = get(loggedUser)
+                
+                
                 if (currentUser && (userEmail === currentUser.email)) {
                     Update(id, 'managed', true)
                 }
@@ -123,9 +126,10 @@ export const socketListen = (socket: Socket) => {
             if (userId >= 0) {
                 gotBoxes[boxId].users[userId]['managing'] = false
                 boxes.set(gotBoxes)
-
+                const currentUser = get(loggedUser)
+                
                 if (currentUser && (userEmail === currentUser.email)) {
-                    Update(id, 'managed', true)
+                    Update(id, 'managed', false)
                 }
             }
         }
