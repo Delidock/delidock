@@ -236,10 +236,7 @@
                 inviteError = "Something went wrong"
                 break;
         }
-    }  
-
-    console.log($loggedUser);
-   
+    }
     
 </script>
 <div class="w-full min-h-[100svh] relative bg-background flex flex-col" class:blur-sm={addUserPopup} class:grayscale-[100%]={addUserPopup} class:!h-screen={addUserPopup} >

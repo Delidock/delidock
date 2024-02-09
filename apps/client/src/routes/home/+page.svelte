@@ -7,18 +7,17 @@
     import { delidock } from "$lib/utils";
 	import { onMount } from "svelte";
 	import { goto } from "$app/navigation";
-	import { boxes } from "$lib/stores";
+	import { boxes, loading } from "$lib/stores";
+	import BoxIcon from "$lib/assets/icons/BoxIcon.svelte";
+	import Button from "$lib/components/Button.svelte";
     
     let date = new Date()
     let today : string = `${date.toLocaleDateString('en-US', {weekday: 'long'})} ${date.toLocaleString('en-US',{month: 'long'})} ${date.getDate()}`
     let now : string = `${date.getHours()}:${("0"+date.getMinutes()).slice(-2)}:${("0"+date.getSeconds()).slice(-2)}`
 
-    let loading : boolean = true
     onMount(()=>{
         if (!delidock.checkToken()) {
             goto('/sign/in', {replaceState: true})
-        } else {
-            loading = false
         }
 
         setInterval(()=> {
@@ -28,9 +27,10 @@
         }, 500)
     })    
     
+    console.log($loading);
+    
 </script>
 <section class="min-h-[100svh] w-full bg-background px-4 flex flex-col gap-1 relative pb-8">
-    {#if !loading}
         <div class="sticky top-0 bg-background pt-4 pb-1 z-10">
             <div class="flex flex-row w-full mb-6">
                 <div class="w-3/5 flex flex-col gap-4">
@@ -57,14 +57,27 @@
                 <button on:click={()=>goto('/home/add', {replaceState: false})} class="transition-transform ease-in-out active:scale-90"><PlusIcon/></button>
             </div>
         </div>
-        <div class="flex flex-col gap-1">
-            <section class="flex flex-col gap-2 items-start">
-                {#if $boxes}
-                    {#each $boxes as box}
-                        <BoxWidget box={box} on:click={()=>goto(`/home/${box.id}`)}/>
-                    {/each}
-                {/if}
-            </section>
-        </div>
-    {/if}
+        {#if !$loading}
+            <div class="flex flex-col gap-1">
+                <section class="flex flex-col gap-2 items-center justify-center">
+                    {#if $boxes.length > 0}
+                        {#each $boxes as box}
+                            <BoxWidget box={box} on:click={()=>goto(`/home/${box.id}`)}/>
+                        {/each}
+                        {:else}
+                            <div class="mt-20 w-1/2 flex flex-col justify-center items-center gap-1">
+                                <p class="text-text_color text-sm">No boxes yet</p>
+                                <Button label="Add new" on:click={()=>goto('/home/add', {replaceState: false})}/>
+                            </div>
+                    {/if}
+                </section>
+            </div>
+            {:else}
+            <div class="flex flex-col justify-center items-center w-full h-full mt-20 gap-2">
+                <div class="animate-spin">
+                    <BoxIcon/>
+                </div>
+                <p class="text-text_color text-lg">Getting your boxes...</p>
+            </div>
+        {/if}
 </section>

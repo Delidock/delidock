@@ -1,5 +1,5 @@
 import { goto } from "$app/navigation";
-import { AddNewStatus, addingStatus, boxes, loggedUser } from "$lib/stores";
+import { AddNewStatus, addingStatus, boxes, loading, loggedUser } from "$lib/stores";
 import type { BoxClient, UserJwtPayload, UserUsingBox } from "@delidock/types";
 import type { Socket } from "socket.io-client";
 import { get } from "svelte/store";
@@ -12,7 +12,9 @@ import { page } from "$app/stores";
 
 export const socketListen = (socket: Socket) => {
 
-    
+    socket.on('initialized', () => {
+        loading.set(false)
+    })
 
     socket.on('disconnect', async (reason) => {
         const cookies = new Cookies()
@@ -151,5 +153,6 @@ export const socketListen = (socket: Socket) => {
 }
 
 export const socketStop = (socket: Socket) => {
+    loading.set(true)
     socket.disconnect()
 }
