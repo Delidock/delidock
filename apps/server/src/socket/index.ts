@@ -50,7 +50,7 @@ class SocketServer{
                         boxSocketListen(socket, io, box.id)
                         socket.emit('initializing')
                         if (box.activated) {
-                            socket.emit('initialized', {pin: box.lastPIN})
+                            socket.emit('initialized', {pin: box.lastPIN, name: box.name})
                             io.of('/ws/users').to(`box:allowed:${box.id}`).to(`box:managed:${box.id}`).emit('boxOnline', box.id)
                         } else if (!box.activated) {
                             socket.emit('activation')

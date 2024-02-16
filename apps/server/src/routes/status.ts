@@ -116,7 +116,7 @@ statusRouter.post('/activate', passport.authenticate('box', {session: false}), a
                 }
 
                 io.of('/ws/users').to(`user:${body.userId}`).emit('boxAddNew', clientBox)
-                res.status(200).send(JSON.stringify({pin: box.lastPIN}))
+                res.status(200).send(JSON.stringify({pin: box.lastPIN, name: box.name}))
             } else if (user && (body.status === ActivationStatus.NOT_OK)) {
                 io.of('/ws/users').to(`user:${body.userId}`).emit('boxAddFailed')
                 res.status(200).send()

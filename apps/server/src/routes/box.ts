@@ -107,6 +107,7 @@ boxRouter.put('/:box/name', passport.authenticate('user', {session: false}), asy
                     }
                 })
                 if (box) {
+                    io.of('/ws/boxes').to(`box:${req.params.box}`).emit("nameSet", req.body.name)
                     io.of('/ws/users').to([`box:allowed:${req.params.box}`,`box:managed:${req.params.box}`]).emit("boxNameChanged", req.params.box, req.body.name)
                     res.send().status(200)
                 } else {
