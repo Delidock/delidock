@@ -115,6 +115,7 @@ statusRouter.post('/activate', passport.authenticate('box', {session: false}), a
                     owner: {name: `${user.firstName} ${user.lastName}`, email: user.email, managing: true}
                 }
 
+                io.of('/ws/users').in(`user:${user.id}`).socketsJoin([`box:managed:${box.id}`,`box:allowed:${box.id}`])
                 io.of('/ws/users').to(`user:${body.userId}`).emit('boxAddNew', clientBox)
                 res.status(200).send(JSON.stringify({pin: box.lastPIN, name: box.name}))
             } else if (user && (body.status === ActivationStatus.NOT_OK)) {
