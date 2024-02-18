@@ -257,6 +257,15 @@ export class Delidock {
         })
 	}
 
+    resumeState = async () => {
+        return await fetch(`${this.api}/user/resume`, {
+            headers: {
+                Authorization: "Bearer "+this.cookies.get('token')
+            },
+            method: 'get',
+        })
+    }
+
 }
 
 

@@ -4,11 +4,12 @@
     import { goto } from "$app/navigation";
 	import { delidock } from "$lib/utils";
 	import { onMount } from "svelte";
-	import { socketStore } from "$lib/stores";
+	import { boxes, socketStore } from "$lib/stores";
     
     import { App } from '@capacitor/app';
 	import { browser } from '$app/environment';
 	import { page } from "$app/stores";
+	import type { BoxClient } from "@delidock/types";
     if (browser) {
         App.removeAllListeners
         App.addListener('backButton', async () => {
@@ -24,6 +25,13 @@
                 window.history.back()
             }
         });
+        App.addListener('resume', async () => {
+            const res = await delidock.resumeState()
+            if (res.status === 200) {
+                const data : BoxClient[] = await res.json()
+                boxes.set(data)
+            }
+        })
     }
     onMount(async ()=> {        
         if (await delidock.checkToken()) {
