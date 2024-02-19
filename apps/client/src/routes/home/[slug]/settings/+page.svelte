@@ -161,13 +161,13 @@
 {#if pickUserPopUp}
     <section class="min-h-screen w-full absolute bg-background flex flex-col">
         <div class="w-full h-16 flex flex-row px-4">
-            <div class="flex items-center justify-start w-full">
+            <div class="flex items-center justify-start w-1/6">
                 <button on:click={()=>pickUserPopUp = false} ><BigCrossIcon/></button>
             </div>
             <div class="flex items-center justify-center w-full">
                 <p class="text-text_color">Select new owner</p>
             </div>
-            <span class="w-full"></span>
+            <span class="w-1/6"></span>
         </div>
         <div class="flex flex-col gap-2 px-4">
             {#each box.users as boxUser}
