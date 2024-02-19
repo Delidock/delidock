@@ -1,5 +1,5 @@
 import { goto } from "$app/navigation"
-import type { BoxAddNewBody, BoxClient, BoxUserOperationBody, LoginRequestBody, RegisterConfirmRequestBody, RegisterRequestBody, RegisterUser, UserPasswordChangeBody } from "@delidock/types"
+import type { BoxAddNewBody, BoxClient, BoxOwnershipChangeBody, BoxUserOperationBody, LoginRequestBody, RegisterConfirmRequestBody, RegisterRequestBody, RegisterUser, UserPasswordChangeBody } from "@delidock/types"
 import { Preferences } from '@capacitor/preferences';
 import Cookies, { type Cookie } from "universal-cookie"
 import { type Socket, io } from 'socket.io-client'
@@ -184,6 +184,37 @@ export class Delidock {
             body: JSON.stringify(body)
         })
         return res
+    }
+
+    transferOwnership = async (boxId: string, newOwnerEmail: string) => {
+        const body : BoxOwnershipChangeBody = {newOwnerEmail}
+        return fetch(`${this.api}/box/${boxId}/transfer`, {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                Authorization: "Bearer "+this.cookies.get('token')
+            },
+            body: JSON.stringify(body)
+        })
+    }
+
+    leaveBox = async (boxId: string) => {
+        return fetch(`${this.api}/box/${boxId}/leave`, {
+            method: 'GET',
+            headers: {
+                Authorization: "Bearer "+this.cookies.get('token')
+            },
+        })
+    }
+
+    deactivateBox = async (boxId: string) => {
+        return fetch(`${this.api}/box/${boxId}/deactivate`, {
+            method: 'GET',
+            headers: {
+                Authorization: "Bearer "+this.cookies.get('token')
+            }
+        })
     }
 
     promoteUser = async (boxId: string, promotedUser: string) => {

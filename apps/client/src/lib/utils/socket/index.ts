@@ -63,7 +63,9 @@ export const socketListen = (socket: Socket) => {
         if (get(boxes).some((b:BoxClient) => b.id === boxId)) {
             const currentPage = get(page)
             
-            if (currentPage.url.pathname === `/home/${boxId}`) {
+            if (currentPage.url.pathname === `/home/${boxId}` || currentPage.url.pathname === `/home/${boxId}/settings`) {
+                console.log("GOING");
+                            
                 goto('/home', {replaceState: true})
                 boxes.update((boxArray: BoxClient[]) => boxArray.filter((box) => box.id !== boxId))
             } else {
@@ -71,6 +73,22 @@ export const socketListen = (socket: Socket) => {
             }
             
         }
+    })
+
+    socket.on('boxTransfer', (id: string, newOwner: UserUsingBox) => {
+        const gotLoggedUser = get(loggedUser)
+        let gotBoxes = get(boxes)
+        let boxId = gotBoxes.findIndex((e) => e.id === id)
+        if (boxId >= 0) {
+            if (gotLoggedUser && (newOwner.email === gotLoggedUser.email)) {
+                Update(id, 'managed', true)
+            } else if (gotLoggedUser && (gotBoxes[boxId].owner.email === gotLoggedUser.email)) {
+                Update(id, 'managed', false)
+            }
+            Update(id, 'users', [...gotBoxes[boxId].users, {...gotBoxes[boxId].owner, managing: false}])
+            Update(id, 'users', gotBoxes[boxId].users.filter(u => u.email !== newOwner.email))
+        }
+        Update(id, 'owner', newOwner)
     })
 
     socket.on('boxAddFailed', ()=> {

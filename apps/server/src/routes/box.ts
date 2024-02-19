@@ -2,7 +2,7 @@ import express from "express";
 import { usePassportController } from "../auth";
 import passport from "passport";
 import { io, prisma } from "../index";
-import { BoxAddNewBody, BoxClient, BoxUserOperationBody, User, UserJwtPayload, UserUsingBox } from "@delidock/types";
+import { BoxAddNewBody, BoxClient, BoxOwnershipChangeBody, BoxUserOperationBody, User, UserJwtPayload, UserUsingBox } from "@delidock/types";
 import { createToken } from "../utils/livekit";
 
 export const boxRouter =  express.Router()
@@ -20,6 +20,193 @@ const getBox = async (boxId: string) => {
         }
     })
 }
+boxRouter.get('/:box/deactivate',(req, res, next) => {req.body['boxId'] = req.params.box; next()}, passport.authenticate('owner', {session: false}), async (req, res) => {
+    const owner = req.user as User
+    if (owner) {
+        try {
+            const allUsersFromBox = await prisma.user.findMany({
+                where: {
+                    OR: [
+                        {
+                            allowedBoxes: {has: req.params.box}
+                        },
+                        {
+                            managedBoxes: {has: req.params.box}
+                        },
+                        {
+                            ownedBoxes: {has: req.params.box}
+                        }
+                    ]
+                }
+            })
+            const deactivatedBox = await prisma.box.update({
+                where: {
+                    id: req.params.box
+                },
+                data: {
+                    activated: false,
+                    owner: null
+                }
+            })
+            io.of('/ws/boxes').to(`box:${req.params.box}`).emit('activation')
+            if (allUsersFromBox) {
+                const userRooms : string[] = []
+                for(const boxUser of allUsersFromBox){
+                    if (hasAllowed(req.params.box, boxUser)) {
+                        const newUser = await prisma.user.update({
+                            where: {
+                                id: boxUser.id
+                            },
+                            data: {
+                                allowedBoxes: { set: boxUser.allowedBoxes.filter((b: string) => b !== req.params.box) }
+                            }
+                        })
+                    } else if (hasManaged(req.params.box, boxUser)) {
+                        const newUser = await prisma.user.update({
+                            where: {
+                                id: boxUser.id
+                            },
+                            data: {
+                                managedBoxes: { set: boxUser.managedBoxes.filter((b: string) => b !== req.params.box) }
+                            }
+                        })
+                    } else if (hasOwned(req.params.box, boxUser)) {
+                        const newUser = await prisma.user.update({
+                            where: {
+                                id: boxUser.id
+                            },
+                            data: {
+                                ownedBoxes: { set: boxUser.ownedBoxes.filter((b: string) => b !== req.params.box) }
+                            }
+                        })
+
+                    }
+                    if (!userRooms.includes(`user:${boxUser.id}`)) {
+                        userRooms.push(`user:${boxUser.id}`)
+                    }
+                }
+                io.of('/ws/users').to(userRooms).emit('boxRemove', req.params.box)
+                io.of('/ws/users').in(userRooms).socketsLeave([`box:allowed:${req.params.box}`,`box:managed:${req.params.box}`])
+                res.status(200).send()
+            }
+        } catch (error) {
+            res.status(404).send()
+        }
+    } else {
+        res.status(401).send()
+    }
+})
+
+boxRouter.post('/:box/transfer', (req, res, next) => {req.body['boxId'] = req.params.box; next()}, passport.authenticate('owner', {session: false}), async (req, res) => {
+    const body : BoxOwnershipChangeBody = req.body
+    const owner = req.user as User
+    if (owner) {
+        try {
+            const newOwner = await prisma.user.findUnique({
+                where: {
+                    email: body.newOwnerEmail,
+                }
+            })
+            if (newOwner) {
+                if (newOwner.id === owner.id) {
+                    res.status(409).send()
+                    return
+                }
+                const updatedOwner = await prisma.user.update({
+                    where: {
+                        id: newOwner.id
+                    }, 
+                    data: {
+                        ownedBoxes: {
+                            set: [...newOwner.ownedBoxes, req.params.box]
+                        },
+                        allowedBoxes: { set: newOwner.allowedBoxes.filter((b: string) => b !== req.params.box) },
+                        managedBoxes: { set: newOwner.managedBoxes.filter((b: string) => b !== req.params.box) }
+                    }
+                })
+                const updatedBox = await prisma.box.update({
+                    where: {
+                        id: req.params.box
+                    },
+                    data: {
+                        owner: newOwner.id
+                    }
+                })
+                if (updatedBox) {
+                    const oldOwner = await prisma.user.update({
+                        where: {
+                            id: owner.id
+                        }, data: {
+                            ownedBoxes: { set: owner.ownedBoxes.filter((b: string) => b !== req.params.box) },
+                            allowedBoxes: { push: req.params.box },
+                        }
+                    })
+
+                    if (oldOwner) {
+                        const newOwnerClient : UserUsingBox = { name: `${newOwner.firstName} ${newOwner.lastName}`, email: newOwner.email, managing: true }
+                        io.of('/ws/users').to([`box:managed:${req.params.box}`, `box:allowed:${req.params.box}`]).emit('boxTransfer', req.params.box, newOwnerClient)
+                        res.status(200).send()
+                    } else {
+                        res.status(404).send()
+                    }
+                } else {
+                    res.status(404).send()
+                }
+            } else {
+                res.status(403).send()
+            }
+        } catch (error) {
+            res.status(404).send()
+        }
+    } else {
+        res.status(401).send()
+    }
+})
+
+boxRouter.get('/:box/leave', passport.authenticate('user', {session: false}), async (req, res) => {
+    const user = req.user as User
+    if (user) {
+        try {
+            if (hasAllowed(req.params.box, user)) {
+                const updatedUser = await prisma.user.update({
+                    where: {
+                        id: user.id
+                    },
+                    data: {
+                        allowedBoxes: { set: user.allowedBoxes.filter((b: string) => b !== req.params.box) }
+                    }
+                })
+                if (updatedUser) {
+                    io.of('/ws/users').to(`user:${updatedUser.id}`).emit('boxRemove', req.params.box)
+                    io.of('/ws/users').to([`box:allowed:${req.params.box}`,`box:managed:${req.params.box}`]).emit('boxUserRemove', req.params.box, updatedUser.email)
+                    io.of('/ws/users').in(`user:${updatedUser.id}`).socketsLeave([`box:allowed:${req.params.box}`,`box:managed:${req.params.box}`])
+                    res.status(200).send()
+                }
+            } else if (hasManaged(req.params.box, user)) {
+                const updatedUser = await prisma.user.update({
+                    where: {
+                        id: user.id
+                    },
+                    data: {
+                        allowedBoxes: { set: user.managedBoxes.filter((b: string) => b !== req.params.box) }
+                    }
+                })
+                if (updatedUser) {
+                    io.of('/ws/users').to(`user:${updatedUser.id}`).emit('boxRemove', req.params.box)
+                    io.of('/ws/users').to([`box:allowed:${req.params.box}`,`box:managed:${req.params.box}`]).emit('boxUserRemove', req.params.box, updatedUser.email)
+                    io.of('/ws/users').in(`user:${updatedUser.id}`).socketsLeave([`box:allowed:${req.params.box}`,`box:managed:${req.params.box}`])
+                    res.status(200).send()
+                }
+            } else {
+                res.status(403).send()
+            }
+        } catch (error) {
+            res.status(404).send()
+        }
+    } else {
+        res.status(401).send()
+    }
+})
 
 boxRouter.post('/activate', passport.authenticate('user', {session: false}), async (req, res) => {
     const body : BoxAddNewBody = req.body

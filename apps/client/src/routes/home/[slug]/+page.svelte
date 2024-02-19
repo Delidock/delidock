@@ -260,7 +260,7 @@
                 {/if}
             {/if}
         </div>
-        <button class="active:scale-90 transition-transform ease-in-out"><GearIcon/></button>
+        <button on:click={()=>goto(`/home/${box.id}/settings`)} class="active:scale-90 transition-transform ease-in-out"><GearIcon/></button>
     </div>
 
     <section class="w-full min-h-[calc(100svh-4rem)] bg-secondary rounded-t-[2rem] flex flex-col gap-2 pb-4 px-4 pt-2">

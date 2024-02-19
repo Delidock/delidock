@@ -49,6 +49,9 @@ export interface BoxChangePinBody {
 export interface BoxUserOperationBody {
     email: string
 }
+export interface BoxOwnershipChangeBody {
+    newOwnerEmail: string
+}
 export interface User{
     id: string,
     createdAt: Date

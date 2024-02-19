@@ -63,5 +63,5 @@
             <Button label="Change password" type="submit"/>
             <Button label="Logout" type="button" forceRed={true} on:click={()=>delidock.logout()}/>
         </form>
-    </div>w
+    </div>
 </section>
