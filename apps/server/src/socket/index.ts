@@ -5,16 +5,10 @@ import { PrismaClient } from "@prisma/client";
 import { BoxJwtPayload, RoleId, UserJwtPayload } from "@delidock/types"
 import { emitBoxes } from "./utils/InitBoxAdd";
 import { boxSocketListen } from "./socket-listeners";
+
+export let aliveBoxes = new Map<string, string[]>()
 class SocketServer{
     io : Server | null = null
-    userSocket : Socket | null = null
-    boxSocket : Socket | null = null
-    getUserSocket = () => {
-        return this.userSocket
-    }
-    getBoxSocket = () => {
-        return this.boxSocket
-    }
 
     startSocket = (io : Server) => {
         const prisma = new PrismaClient()
@@ -25,17 +19,20 @@ class SocketServer{
                 password: "$2y$10$.xrNVHREo2Bxm2.xEv97SuTRC/Kx4ebbKZ/rcEHqlRPs/kez1/s4a"
             },
           });
-    
-        
+
         io.of("/ws/boxes").on("connection", async (socket : Socket) => {
-            this.boxSocket = socket
-            
             if (!jwt.verify(socket.handshake.auth.token, process.env.DELIDOCK_API_SECRET ?? "")   ) {
                 socket.disconnect()    
             }
             const boxPayload = jwt.decode(socket.handshake.auth.token, { json: true}) as BoxJwtPayload | null
 
             if (boxPayload && (boxPayload.role === RoleId.Box)) {
+                if (aliveBoxes.has(boxPayload.id)) {
+                    aliveBoxes.get(boxPayload.id)?.push(socket.id)
+                } else {
+                    aliveBoxes.set(boxPayload.id, [socket.id])
+                }
+                boxSocketListen(socket, io, boxPayload.id)
                 socket.join(`box:${boxPayload.id}`)
                 try {
                     const box = await prisma.box.update({
@@ -47,11 +44,11 @@ class SocketServer{
                         }
                     })
                     if (box) {
-                        boxSocketListen(socket, io, box.id)
                         socket.emit('initializing')
                         if (box.activated) {
-                            socket.emit('initialized', {pin: box.lastPIN, name: box.name})
+                            socket.emit('initialized', {pin: box.lastPIN, name: box.name})    
                             io.of('/ws/users').to(`box:allowed:${box.id}`).to(`box:managed:${box.id}`).emit('boxOnline', box.id)
+                            
                         } else if (!box.activated) {
                             socket.emit('activation')
                         }
@@ -67,7 +64,6 @@ class SocketServer{
         })
 
         io.of("/ws/users").on("connection", async (socket : Socket)=>{
-            this.userSocket = socket
             try {
                 if (!jwt.verify(socket.handshake.auth.token, process.env.DELIDOCK_API_SECRET ?? "")   ) {
                     socket.disconnect()    
