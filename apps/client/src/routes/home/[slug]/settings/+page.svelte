@@ -84,7 +84,7 @@
     $: {
         if ($boxes[data.boxId]) {
             box = $boxes[data.boxId]
-        }
+        }        
     }
 </script>
 <section class="w-full h-screen bg-background absolute transition-colors ease-in-out" class:blur-sm={poppedUp} class:grayscale-[100%]={poppedUp}>
@@ -95,7 +95,7 @@
         </div>
     </div>
     <div class="w-full min-h-[calc(100svh-4rem)] bg-secondary rounded-t-[2rem] flex flex-col gap-2 pb-4 px-4 pt-4">
-        {#if box.managed}
+        {#if box.owner.email === $loggedUser?.email}
             <div class="flex flex-col gap-2">
                 <Button on:click={()=>popUp("ownership")} forceRed={true} label="Transfer ownership" />
                 <Button on:click={()=>popUp("deactivation")} forceRed={true} label="Deactivate" />
