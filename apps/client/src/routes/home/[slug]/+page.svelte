@@ -6,8 +6,9 @@
 	import { tick } from 'svelte';
 	import { delidock } from '$lib/utils/delidock.js';
     import { type Participant, RemoteParticipant, Room, RoomEvent, Track, type RoomOptions } from 'livekit-client';
-	import { boxes, loggedUser } from '$lib/stores/index.js';
+	import { boxes, loggedUser, socketStore } from '$lib/stores/index.js';
 	import { slide } from 'svelte/transition';
+	import { socketListen } from '$lib/utils/socket/index.js';
     enum LivekitState {
         DISCONNECTED = 0,
         VIEW = 1,
@@ -74,7 +75,13 @@
             }
         }
     }
-    
+
+    $socketStore?.on("boxOffline", (boxId : string) => {
+        if (box.id === boxId) {
+            liveKit.disconnect()
+        }
+    })
+
     let copyText = false
 
 
