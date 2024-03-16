@@ -43,6 +43,7 @@
 		"@capacitor/keyboard": "^5.0.7",
 		"@capacitor/preferences": "^5.0.6",
 		"@capacitor/splash-screen": "^5.0.6",
+		"capacitorjs-plugin-wifi": "^1.0.7",
 		"jwt-decode": "^4.0.0",
 		"livekit-client": "^1.15.5",
 		"qr-scanner": "^1.4.2",

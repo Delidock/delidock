@@ -10,6 +10,9 @@
 	import { boxes, loading } from "$lib/stores";
 	import BoxIcon from "$lib/assets/icons/BoxIcon.svelte";
 	import Button from "$lib/components/Button.svelte";
+	import CrossIcon from "$lib/assets/icons/CrossIcon.svelte";
+	import BigCrossIcon from "$lib/assets/icons/BigCrossIcon.svelte";
+	import { fade, slide } from "svelte/transition";
     
     let date = new Date()
     let today : string = `${date.toLocaleDateString('en-US', {weekday: 'long'})} ${date.toLocaleString('en-US',{month: 'long'})} ${date.getDate()}`
@@ -27,10 +30,35 @@
         }, 500)
     })    
     
-    console.log($loading);
+    let addNewModal = false
     
 </script>
-<section class="min-h-[100svh] w-full bg-background px-4 flex flex-col gap-1 relative pb-8">
+<main class="relative">
+    {#if addNewModal}
+        <div transition:slide={{axis:"y"}} class="w-full h-[calc(100%-4rem)] absolute bottom-0 z-20 flex flex-col px-2">
+            <div class=" bg-secondary rounded-t-[1rem] pt-4 px-4 h-full w-full flex flex-col gap-2">
+                <div class="flex flex-row items-center">
+                    <div class="w-4/6 flex justify-start text-start text-text_color text-2xl">
+                        <p>Add new</p>
+                    </div>
+                    <div class="w-2/6 flex justify-end">
+                        <button on:click|preventDefault={()=>addNewModal = false} class="active:scale-90 transition-transform ease-in-out"><CrossIcon/></button>
+                    </div>
+                </div>
+                <div class="flex flex-col gap-4">
+                    <div class="flex flex-col gap-2">
+                        <p class="text-text_color text-sm mb-2">Link already connected box by scaning QR code that is showed on the box.</p>
+                        <Button label="Link box" on:click={()=>goto('/home/add', {replaceState: false})}/>
+                    </div>
+                    <div>
+                        <p class="text-text_color text-sm mb-2">Complete network setup to get the box connected to the internet.</p>
+                        <Button label="Network setup" on:click={()=>goto('/home/network', {replaceState: false})}/>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {/if}
+    <section class="h-[100svh] w-full bg-background px-4 flex flex-col gap-1 relative transition-filter ease-in-out" class:blur-md={addNewModal} class:grayscale={addNewModal}>
         <div class="sticky top-0 bg-background pt-4 pb-1 z-10">
             <div class="flex flex-row w-full mb-6">
                 <div class="w-3/5 flex flex-col gap-4">
@@ -54,11 +82,11 @@
             </div>
             <div class="flex flex-row justify-between items-center">
                 <h4 class="text-text_color text-xs">Availible boxes:</h4>
-                <button on:click={()=>goto('/home/add', {replaceState: false})} class="transition-transform ease-in-out active:scale-90"><PlusIcon/></button>
+                <button on:click={()=>addNewModal = true} class="transition-transform ease-in-out active:scale-90"><PlusIcon/></button>
             </div>
         </div>
         {#if !$loading}
-            <div class="flex flex-col gap-1">
+            <div class="flex flex-col gap-1 overflow-scroll pb-4">
                 <section class="flex flex-col gap-2 items-center justify-center">
                     {#if $boxes.length > 0}
                         {#each $boxes as box}
@@ -80,4 +108,5 @@
                 <p class="text-text_color text-lg">Getting your boxes...</p>
             </div>
         {/if}
-</section>
+    </section>
+</main>

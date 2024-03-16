@@ -19,6 +19,9 @@ export default {
       },
       height: {
         72: "4.5rem"
+      },
+      transitionProperty:{
+        filter: "filter"
       }
     },
   },

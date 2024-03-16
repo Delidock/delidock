@@ -136,7 +136,7 @@
             <p class="flex text-text_color">Add box</p>
         </div>
     </div>
-    <div class="flex flex-col gap-4 h-[calc(100vh-4rem)] w-full bg-secondary rounded-t-[2rem] pt-4 px-4">
+    <div class="flex flex-col gap-4 h-[calc(100vh-4rem)] w-full bg-secondary rounded-t-[2rem] pt-4 px-4 relative">
         <div class="relative aspect-square w-full rounded-lg border border-outline overflow-hidden qr-gradient">
             <!-- svelte-ignore a11y-media-has-caption -->
             <video placeholder={placeholder} class=" h-full object-cover overflow-hidden aspect-square"class:hidden={!videoVisible} bind:this={qrVideoElement} src=""></video>
@@ -161,6 +161,9 @@
             
             <button on:click|preventDefault={()=>doEnterManually()} class="active:text-text_color text-btn_primary transition-color ease-in-out">enter manually</button>        
         </div>
+        <!-- <div class="w-full absolute bottom-4">
+            <p class="text-text_color text-sm">Isn't your box connected to internet? then start <button class="active:text-text_color text-btn_primary transition-color ease-in-out">network setup</button></p>
+        </div> -->
     </div>
     
 </section>

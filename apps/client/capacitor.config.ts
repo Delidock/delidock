@@ -7,7 +7,8 @@ const config: CapacitorConfig = {
   appName: 'DelidockApp',
   webDir: 'build',
   server: {
-    androidScheme: 'https'
+    androidScheme: 'https',
+    cleartext: true
   },
   plugins: {
     Keyboard: {
