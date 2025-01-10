@@ -1,5 +1,6 @@
 # Delidock
 This repo is huge part of Delidock ecosystem, containg backend for managing the box and transport of the live video stream.
+### See also [box application](https://github.com/Delidock/delidock-box-electron) for the physical box
 ## Dependencies
 - `node >= 18`
 - `pnpm`
